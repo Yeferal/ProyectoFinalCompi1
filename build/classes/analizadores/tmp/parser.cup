@@ -1,0 +1,202 @@
+//codigo usuario
+package analizadores.tmp;
+import java_cup.runtime.Symbol;
+import java.util.ArrayList;
+import objetos.*;
+import tablas.*;
+
+//Codigo para el parser, variables, metodos
+parser code
+{:
+    TablaSimbolos tablaSimbolos;
+    TablaSimbolos tablaSimbolosTiempos;
+    public ArrayList<ErrorG> listaErrores = new  ArrayList<>();
+    
+    public void setTablaTiempos(TablaSimbolos tablaSimbolosTiempos){
+        this.tablaSimbolosTiempos = tablaSimbolosTiempos; 
+    }
+
+    public TablaSimbolos getTablaTiempos(){
+        return tablaSimbolosTiempos; 
+    }
+    public void setTabla(TablaSimbolos tablaSimbolos){
+        this.tablaSimbolos = tablaSimbolos; 
+    }
+
+    public TablaSimbolos getTabla(){
+        return tablaSimbolos; 
+    }
+
+
+
+    private Symbol s;
+    public void syntaxError(Symbol s){
+        this.s = s;
+    }
+    public Symbol getS(Symbol s){
+        return this.s = s;
+    }
+
+    public void setAccion(String tipo,String mensaje,String accion){
+            System.out.println(tipo+"         "+mensaje);
+        }
+
+    public void syntax_error(Symbol s){
+            if(s!=null){
+                ErrorG e = new ErrorG(s.right,s.left,(String) s.value,"Sintactico","Error Sintaxis token: "+(String) s.value+" ------ Linea: " + (s.right+1) + ",   Columna: " + (s.left+1));
+                listaErrores.add(e);
+                setAccion("ERROR","Error Sintaxis token: Linea: " + (s.right+1) + ",   Columna: " + (s.left+1) + ",  Simbolo: " + s.value, "");
+            }
+    }
+
+:}
+
+//Coidgo para las acciones gramaticales
+
+action code
+{:
+    TablaSimbolos tablaSimbolos = new TablaSimbolos();
+    TablaSimbolos tablaTiempos = new TablaSimbolos();
+    TablaSimbolos tablaImagenes = new TablaSimbolos();
+    Lienzo lienzo;
+    Tiempo tiempo;
+    Imagen imagen;
+    String nombreLienzo;
+    String inicio;
+    String fin;
+    boolean correcto;
+    boolean existeLienzo;
+    
+:}
+
+//Declaraciones 
+terminal CORCHETE_A, CORCHETE_C, DOS_PUNTOS, COMA, COMILLAS, LLAVES_A, LLAVES_C;
+terminal TIEMPOS,TAMANIO, IDENTIFICADOR, NUMERO,FONDO, CODIGO_HEX;
+terminal NOMBRE, TIPO, PNG, GIF, HEX, RED, DURACION, ID, IMAGENES, FIN, INICIO_RSRVD;
+
+// declaracion no terminales
+non terminal INICIO, ESTRUCTURA_TIEMPOS, ESTRUCTURA_PARAMETROS, S0, PARAMETROS, ATRIBUTOS, ESTRUCTURA_IMAGENES, S1, ATRIB_IMAGENES, IDENTIFICADORES;
+
+//presedencia de menor a mayor
+//precedence left NOMBRE, PALABRA;
+
+INICIO ::=  LLAVES_A ESTRUCTURA_TIEMPOS LLAVES_C
+           |error:e ESTRUCTURA_PARAMETROS {:parser.syntax_error((Symbol)e);:}
+           |error:e ATRIBUTOS {:parser.syntax_error((Symbol)e);:}
+           |error:e ATRIB_IMAGENES {:parser.syntax_error((Symbol)e);:}
+           |error:e ESTRUCTURA_IMAGENES {:parser.syntax_error((Symbol)e);:};
+
+ESTRUCTURA_TIEMPOS ::= TIEMPOS {:tablaSimbolos = parser.getTabla();:} DOS_PUNTOS LLAVES_A ESTRUCTURA_PARAMETROS LLAVES_C {:parser.setTablaTiempos(tablaImagenes);:};
+
+ESTRUCTURA_PARAMETROS ::= IDENTIFICADOR:a {:
+                        nombreLienzo = (String) a;
+                        if(tablaSimbolos.buscarSimboloTipo((String) a,"Lienzo")){
+                            existeLienzo = true;
+                        }else{
+                            existeLienzo = false;
+                            ErrorG e = new ErrorG(aright+1,aleft+1,(String) a,"Semantico","El simbolo "+(String) a+" Tipo Lienzo NO EXISTE");
+                            parser.listaErrores.add(e);
+                            System.out.println("Semantico: El simbolo "+(String) a+" Tipo Lienzo NO EXISTE");
+                        }
+                        
+                        
+                        :} DOS_PUNTOS LLAVES_A PARAMETROS LLAVES_C {:
+                        //verificar si existe inicio y final
+                        correcto = true;
+                        if(!tablaImagenes.buscarSimboloTipo(inicio,nombreLienzo)){
+                            ErrorG e = new ErrorG(aright+1,aleft+1,(String) a,"Semantico","El simbolo inicio: "+inicio+" no existe imagen");
+                            parser.listaErrores.add(e);
+                            correcto = false;
+                            System.out.println("Semantico: El simbolo inicio: "+inicio+" su no existe imagen");
+                        }
+                        if(!tablaImagenes.buscarSimboloTipo(fin,nombreLienzo)){
+                            ErrorG e = new ErrorG(aright+1,aleft+1,(String) a,"Semantico","El simbolo fin: "+fin+" su no existe imagen");
+                            parser.listaErrores.add(e);
+                            correcto = false;
+                            System.out.println("Semantico: El simbolo fin: "+fin+" su no existe imagen");
+                        }
+                        if(existeLienzo && correcto){   
+                            Lienzo l = tablaSimbolos.getLienzo(nombreLienzo);
+                            l.setInicio(inicio);
+                            l.setFin(fin);
+                            tablaSimbolos.modificar(nombreLienzo,"Lienzo",l);
+                        }
+                        :} S0;
+
+S0 ::= 	 COMA ESTRUCTURA_PARAMETROS
+	| ;
+
+PARAMETROS ::= ATRIBUTOS:a COMA ATRIBUTOS:b COMA ATRIBUTOS:c {:
+                        int a1 = (int) a;
+                        int a2 = (int) b;
+                        int a3 = (int) c;
+                        if(a1==a2 || a1==a3 || a2==a3){
+                            correcto = false;
+                            ErrorG e = null;
+                            //error dato duplicado
+                            System.out.println("se duplico algun atributo");
+                            if(a1==a2){
+                                e = new ErrorG(bright+1,bleft+1,(String) a,"Sintactico","Error Sintaxis token: "+(String) a+" ------ Linea: "+(bright+1)+",   Columna: "+(bleft+1));
+                                System.out.println("Error Sintaxis token: "+(String) a+" ------ Linea: "+(bright+1)+",   Columna: "+(bleft+1));
+                            }
+                            if(a1==a3){
+                                e = new ErrorG(cright+1,cleft+1,(String) a,"Sintactico","Error Sintaxis token: "+(String) a+" ------ Linea: "+(cright+1)+",   Columna: "+(cleft+1));
+                                System.out.println("Error Sintaxis token: "+(String) a+" ------ Linea: "+(cright+1)+",   Columna: "+(cleft+1));
+                            }
+
+                            if(a2==a3){
+                                e = new ErrorG(cright+1,cleft+1,(String) a,"Sintactico","Error Sintaxis token: "+(String) a+" ------ Linea: "+(cright+1)+",   Columna: "+(cleft+1));
+                                System.out.println("Error Sintaxis token: "+(String) a+" ------ Linea: "+(cright+1)+",   Columna: "+(cleft+1));
+                            }
+                            
+                            parser.listaErrores.add(e);
+                        }
+                    :};
+
+ATRIBUTOS ::=   INICIO_RSRVD DOS_PUNTOS COMILLAS IDENTIFICADOR:a {: inicio = (String) a; :} COMILLAS {:RESULT = 1;:}
+                |FIN DOS_PUNTOS COMILLAS IDENTIFICADOR:a {: fin = (String) a; :} COMILLAS {:RESULT = 2;:}
+                |IMAGENES DOS_PUNTOS CORCHETE_A ESTRUCTURA_IMAGENES CORCHETE_C {:RESULT = 3;:};
+
+IDENTIFICADORES ::= IDENTIFICADOR:a IDENTIFICADORES:b 
+                    {:  String t = " ";
+                        if(b!=null){
+                            t = (String)a+" "+(String)b;
+                        }else{
+                            t = (String)a;
+                        } 
+                        System.out.println("entro a intificadores id: "+(String)t); 
+                        RESULT = (String)t; 
+                        
+                    :}
+                    |NUMERO:a IDENTIFICADORES:b 
+                    {:  String t = " ";
+                        if(b!=null){
+                            t = (String)a+" "+(String)b;
+                        }else{
+                            t = (String)a;
+                        } 
+                        System.out.println("entro a intificadores id: "+(String)t); 
+                        RESULT = (String)t; 
+                        
+                    :}
+                    | ;
+
+
+ESTRUCTURA_IMAGENES ::= LLAVES_A ATRIB_IMAGENES:a LLAVES_C {:
+                    if(existeLienzo){
+                        SimboloObject simbolo = new SimboloObject(imagen.getId(), nombreLienzo, imagen);
+                        tablaImagenes.agregarSimbolo(simbolo);
+                    }else{
+                        ErrorG e = new ErrorG(aright+1,aleft+1,imagen.getId(),"Semantico","El simbolo "+imagen.getId()+" Tipo imagen");
+                        parser.listaErrores.add(e);
+                        System.out.println("Semantico: El simbolo "+imagen.getId()+" Tipo Imagen");
+                    }
+                    
+                    
+                    :} S1;
+
+S1 ::= 	  COMA ESTRUCTURA_IMAGENES
+	| ;
+
+ATRIB_IMAGENES ::= ID DOS_PUNTOS COMILLAS IDENTIFICADOR:a COMILLAS COMA DURACION DOS_PUNTOS NUMERO:b {:imagen = new Imagen((String) a,Integer.parseInt((String) b));:}
+		  |DURACION DOS_PUNTOS NUMERO:b COMA ID DOS_PUNTOS COMILLAS IDENTIFICADOR:a COMILLAS {:imagen = new Imagen((String) a,Integer.parseInt((String) b));:};

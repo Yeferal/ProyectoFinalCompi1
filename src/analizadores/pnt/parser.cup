@@ -1,0 +1,946 @@
+//codigo usuario
+package analizadores.pnt;
+import java_cup.runtime.Symbol;
+import java.util.ArrayList;
+import objetos.*;
+import tablas.*;
+
+//Codigo para el parser, variables, metodos
+parser code
+{:
+    TablaSimbolos tablaSimbolosVariables;
+    TablaSimbolos tablaSimbolos;
+    TablaSimbolos tablaSimbolosPintar;
+    TablaSimbolos tablaSimbolosColores;
+    TablaSimbolos tablaSimbolosImagenes;
+    public ArrayList<ErrorG> listaErrores = new  ArrayList<>();
+
+    public void setTabla(TablaSimbolos tablaSimbolos){
+        this.tablaSimbolos = tablaSimbolos; 
+    }
+
+    public TablaSimbolos getTablaSimbolos(){
+        return tablaSimbolos; 
+    }
+
+    public void setTablaVariables(TablaSimbolos tablaSimbolosVariables){
+        this.tablaSimbolosVariables = tablaSimbolosVariables; 
+    }
+
+    public TablaSimbolos getTablaVariables(){
+        return tablaSimbolosVariables; 
+    }
+    
+    public void setTablaPintar(TablaSimbolos tablaSimbolosPintar){
+        this.tablaSimbolosPintar = tablaSimbolosPintar; 
+    }
+
+    public TablaSimbolos getTablaPintar(){
+        return tablaSimbolosPintar; 
+    }
+
+
+
+    public void setTablaColores(TablaSimbolos tablaSimbolosColores){
+        this.tablaSimbolosColores = tablaSimbolosColores; 
+    }
+
+    public void setTablaImagenes(TablaSimbolos tablaSimbolosImagenes){
+        this.tablaSimbolosImagenes = tablaSimbolosImagenes; 
+    }
+
+
+
+
+
+
+
+
+
+
+
+    private Symbol s;
+    public void syntaxError(Symbol s){
+        this.s = s;
+    }
+    public Symbol getS(Symbol s){
+        return this.s = s;
+    }
+
+    public void setAccion(String tipo,String mensaje,String accion){
+            System.out.println(tipo+"         "+mensaje);
+        }
+
+    public void syntax_error(Symbol s){
+            if(s!=null){
+                ErrorG e = new ErrorG(s.right,s.left,(String) s.value,"Sintactico","Error Sintaxis token: "+(String) s.value+" ------ Linea: " + (s.right+1) + ",   Columna: " + (s.left+1));
+                listaErrores.add(e);
+                setAccion("ERROR","Error Sintaxis token: Linea: " + (s.right+1) + ",   Columna: " + (s.left+1) + ",  Simbolo: " + s.value, "");
+            }
+    }
+
+:}
+
+//Coidgo para las acciones gramaticales
+
+action code
+{:
+    TablaSimbolos tablaSimbolosVariables = new TablaSimbolos();
+    TablaSimbolos tablaSimbolosPintar = new TablaSimbolos();
+    TablaSimbolos tablaSimbolosColores;
+    TablaSimbolos tablaSimbolosImagenes;
+    int entero, tipoIdP;
+    String texto, lienzoInstruccion;
+    String nombre;
+    boolean boleano;
+    boolean correcto;
+    VerificadorDatos verificadorDatos = new VerificadorDatos();
+
+    public boolean verificarTipoDato(Object o){
+        try {
+		Integer.parseInt((String) o);
+		return true;
+	} catch (NumberFormatException nfe){
+		return false;
+	}
+        catch (ClassCastException ex){
+		return true;
+	}
+    }
+:}
+
+//Declaraciones 
+terminal CORCHETE_A, CORCHETE_C, DOS_PUNTOS, COMA, COMILLAS, LLAVES_A, LLAVES_C, IDENTIFICADOR, PUNTO_COMA, COMENTAR_LINEA;
+terminal VARS, IGUAL, MAS, MENOS, ASTERISCO, DIAGONAL, MENOR_QUE, MAYOR_QUE, PARENTESIS_A, PARENTESIS_C, PUNTO, PINTAR_MIN;
+terminal INT,STRING, BOOLEAN, IF,ELSE,WHILE, AND, OR, INSTRUCCIONES, PINTAR, NUMERO, COMENTAR_A, COMENTAR_C;
+terminal TRUE, FALSE, MAYOR_IGUAL, MENOR_IGUAL, IGUAL_IGUAL, DIFERENTE, PUNTO_PUNTO, SALTO;
+
+// declaracion no terminales
+non terminal INICIO, INICIO_VARS, INICIO_INSTRUCCIONES, S0, COMENTARIO, ESTRUCTURA_VARS, DECLARACION_VARIABLES, ASIG_VARS_INT, OPERACION;
+non terminal CADENA_ASIG_INT, ASIG_VARS_STRING, CONCATENACION, TIPO_TEXTO, CADENA_ASIG_STRING, ASIG_VARS_BOOLEAN, TIPO_BOOL, CADENA_ASIG_BOOLEAN;
+non terminal ESTRUCTURA_INSTRUCCIONES, ASIGNACION_VALORES, ASIG, OPERADOR_LOGICO, OPERACION_LOGICA, OPERADOR_RACIONAL, ESTRUC_PINTAR, PRMT, PRMT1, ESTRUC_WHILE;
+non terminal CONDICION_L, CODICIONES, CONTENIDO, ESTRUC_IF_ELSE, ESTRUC_ELSE, TIPO_DATO,OPERADOR_ARITMETICO,TIPOS_INT, OPERA_LOGICA;
+non terminal OPERACION2, TIPOS_INT2, PRMT2, DATO,E, LO_QUE_SEA, LO_QUE_SEA_SALTO, FINALIZAR, LO, LOA, OPERACION_BOOLEANA, DATOS_BOOLEANOS;
+non terminal TIPO_PINTAR;
+
+//presedencia de menor a mayor
+precedence left IGUAL_IGUAL,MENOR_QUE,MAYOR_QUE,MAYOR_IGUAL,MENOR_IGUAL, DIFERENTE,PUNTO_PUNTO;
+precedence left MAS, MENOS;
+precedence left ASTERISCO, DIAGONAL;
+
+
+start with INICIO;
+
+//Reglas Semanticas
+
+INICIO ::= INICIO_VARS FINALIZAR INICIO_INSTRUCCIONES
+           |error:e DECLARACION_VARIABLES {:parser.syntax_error((Symbol)e);:}
+           |error:e ASIGNACION_VALORES {:parser.syntax_error((Symbol)e);:}
+           |error:e ESTRUC_PINTAR {:parser.syntax_error((Symbol)e);:}
+           |error:e INICIO_INSTRUCCIONES {:parser.syntax_error((Symbol)e);:};
+
+INICIO_VARS ::= VARS CORCHETE_A FINALIZAR ESTRUCTURA_VARS CORCHETE_C {:parser.setTablaVariables(tablaSimbolosVariables); parser.setTablaPintar(tablaSimbolosPintar);:};
+
+
+
+INICIO_INSTRUCCIONES ::= INSTRUCCIONES PARENTESIS_A IDENTIFICADOR:a {:
+                        if(!parser.tablaSimbolos.buscarSimbolo((String)a)){
+                                correcto = false;
+                                ErrorG e = new ErrorG(aright+1,aleft+1,(String) a,"Semantico","El simbolo "+(String) a+" ya existe");
+                                parser.listaErrores.add(e);
+                                System.out.println("Semantico: El simbolo "+(String) a+" ya existe");
+                            }
+                        :} PARENTESIS_C {:lienzoInstruccion = (String)a;:} CORCHETE_A FINALIZAR ESTRUCTURA_INSTRUCCIONES CORCHETE_C S0;
+
+S0 ::= 	  INICIO_INSTRUCCIONES
+	| SALTO S0
+	| ;
+
+
+
+
+
+COMENTARIO ::=   DIAGONAL ASTERISCO LOA ASTERISCO DIAGONAL FINALIZAR{: System.out.println("salio "); :}
+                |DIAGONAL DIAGONAL LO SALTO {: System.out.println("salio linea"); :};
+
+FINALIZAR ::= SALTO FINALIZAR
+             |;
+
+
+ESTRUCTURA_VARS ::=  DECLARACION_VARIABLES ESTRUCTURA_VARS
+                    |COMENTARIO {: System.out.println("salio COMENTARIO"); :} ESTRUCTURA_VARS 
+                    |;
+
+DECLARACION_VARIABLES ::=    INT IDENTIFICADOR:a {:nombre=(String) a; correcto = true;
+                            if(tablaSimbolosVariables.buscarSimbolo(nombre)){
+                                correcto = false;
+                                ErrorG e = new ErrorG(aright+1,aleft+1,(String) a,"Semantico","El simbolo "+(String) a+" ya existe");
+                                parser.listaErrores.add(e);
+                                System.out.println("Semantico: El simbolo "+(String) a+" ya existe");
+                            }
+                            
+                            :} ASIG_VARS_INT PUNTO_COMA FINALIZAR
+
+                            |STRING IDENTIFICADOR:a {:nombre=(String) a; correcto = true;
+                            if(tablaSimbolosVariables.buscarSimbolo(nombre)){
+                                correcto = false;
+                                ErrorG e = new ErrorG(aright+1,aleft+1,(String) a,"Semantico","El simbolo "+(String) a+" ya existe");
+                                parser.listaErrores.add(e);
+                                System.out.println("Semantico: El simbolo "+(String) a+" ya existe");
+                            }
+                            
+                            :} ASIG_VARS_STRING PUNTO_COMA FINALIZAR
+
+			    |BOOLEAN IDENTIFICADOR:a {:nombre=(String) a; correcto = true;
+                            if(tablaSimbolosVariables.buscarSimbolo(nombre)){
+                                correcto = false;
+                                ErrorG e = new ErrorG(aright+1,aleft+1,(String) a,"Semantico","El simbolo "+(String) a+" ya existe");
+                                parser.listaErrores.add(e);
+                                System.out.println("Semantico: El simbolo "+(String) a+" ya existe");
+                            }
+                            
+                            :} ASIG_VARS_BOOLEAN PUNTO_COMA FINALIZAR;
+
+ASIG_VARS_INT ::= IGUAL OPERACION:a {:entero=Integer.parseInt((String)a);
+                    SimboloObject s = new SimboloObject(nombre, "Int", entero);
+                    if(correcto){
+                        System.out.println("agrego: "+entero);
+                        tablaSimbolosVariables.agregarSimbolo(s);
+                    }
+                    :} CADENA_ASIG_INT
+		 |{: SimboloObject s = new SimboloObject(nombre, "Int", 0);
+                    if(correcto){
+                        tablaSimbolosVariables.agregarSimbolo(s);
+                    }
+                    :} CADENA_ASIG_INT;
+
+OPERACION ::=    OPERACION:a MAS OPERACION:b {: int val1 = Integer.parseInt((String)a);
+                        int val2 = Integer.parseInt((String)b);
+                        int r = val1 + val2;
+                        System.out.println("valor: "+r);
+                        RESULT = String.valueOf(r);
+                    :}
+		|OPERACION:a MENOS OPERACION:b {: int val1 = Integer.parseInt((String)a);
+                        int val2 = Integer.parseInt((String)b);
+                        int r = val1 - val2;
+                        System.out.println("valor: "+r);
+                        RESULT = String.valueOf(r);
+                    :}
+		|OPERACION:a ASTERISCO OPERACION:b {: int val1 = Integer.parseInt((String)a);
+                        int val2 = Integer.parseInt((String)b);
+                        int r = val1 * val2;
+                        System.out.println("valor: "+r);
+                        RESULT = String.valueOf(r);
+                    :}
+		|OPERACION:a DIAGONAL OPERACION:b {: int val1 = Integer.parseInt((String)a);
+                        int val2 = Integer.parseInt((String)b);
+                        int r = val1 / val2;
+                        System.out.println("valor: "+r);
+                        RESULT = String.valueOf(r);
+                    :}
+		|NUMERO:a {: RESULT = (String)a; :}
+                |IDENTIFICADOR:a {:
+                            Object num = tablaSimbolosVariables.getObjeto((String) a,"Int");
+                            if(num!=null){
+                                String lee = ""+num;
+                                RESULT = lee;
+                            }else{
+                                correcto = false;
+                                ErrorG e = new ErrorG(aright+1,aleft+1,(String) a,"Semantico","El simbolo "+(String) a+" no existe o no tiene valor");
+                                parser.listaErrores.add(e);
+                                System.out.println("Semantico: El simbolo "+(String) a+" no existe o no tiene valor");
+                                RESULT = 0;
+                            }
+                
+                :};
+
+TIPOS_INT ::=    NUMERO
+                |IDENTIFICADOR;
+
+CADENA_ASIG_INT ::=  COMA IDENTIFICADOR:a {:nombre=(String) a; correcto = true;
+                            if(tablaSimbolosVariables.buscarSimbolo(nombre)){
+                                correcto = false;
+                                ErrorG e = new ErrorG(aright+1,aleft+1,(String) a,"Semantico","El simbolo "+(String) a+" ya existe");
+                                parser.listaErrores.add(e);
+                                System.out.println("Semantico: El simbolo "+(String) a+" ya existe");
+                            }
+                            
+                            :} IGUAL OPERACION:b {:entero=Integer.parseInt((String)b);
+                                SimboloObject s = new SimboloObject(nombre, "Int", entero);
+                                if(correcto){
+                                    System.out.println("agrego: "+entero);
+                                    tablaSimbolosVariables.agregarSimbolo(s);
+                                }
+                    :} CADENA_ASIG_INT
+
+                    |COMA IDENTIFICADOR:a {:nombre=(String) a; correcto = true;
+                            if(tablaSimbolosVariables.buscarSimbolo(nombre)){
+                                correcto = false;
+                                ErrorG e = new ErrorG(aright+1,aleft+1,(String) a,"Semantico","El simbolo "+(String) a+" ya existe");
+                                parser.listaErrores.add(e);
+                                System.out.println("Semantico: El simbolo "+(String) a+" ya existe");
+                            }
+                            SimboloObject s = new SimboloObject(nombre, "Int", 0);
+                            if(correcto){
+                                tablaSimbolosVariables.agregarSimbolo(s);
+                            }
+                            
+                            :} CADENA_ASIG_INT
+                    | ;
+
+
+ASIG_VARS_STRING ::= IGUAL CONCATENACION:a {:texto = (String)a;
+                    SimboloObject s = new SimboloObject(nombre, "String", texto);
+                    if(correcto){
+                        System.out.println("agrego: "+entero);
+                        tablaSimbolosVariables.agregarSimbolo(s);
+                    }
+                    :} CADENA_ASIG_STRING
+                    | {:
+                    SimboloObject s = new SimboloObject(nombre, "String", "");
+                    if(correcto){
+                        System.out.println("agrego: "+entero);
+                        tablaSimbolosVariables.agregarSimbolo(s);
+                    }
+                    :} CADENA_ASIG_STRING;
+
+CONCATENACION ::=    CONCATENACION:a MAS CONCATENACION:b {:String concatenacion = a+""+b; RESULT = concatenacion; :}
+		    |COMILLAS TIPO_TEXTO:a COMILLAS {: RESULT = (String)a; :}
+		    |NUMERO:a {: RESULT = (String)a; :}
+                    |IDENTIFICADOR:a {:
+                            Object tex = tablaSimbolosVariables.getObjeto((String) a,"String");
+                            if(tex!=null){
+                                String lee = tex+"";
+                                RESULT = lee;
+                            }else{
+                                correcto = false;
+                                ErrorG e = new ErrorG(aright+1,aleft+1,(String) a,"Semantico","El simbolo "+(String) a+" no existe o no tiene valor");
+                                parser.listaErrores.add(e);
+                                System.out.println("Semantico: El simbolo "+(String) a+" no existe o no tiene valor");
+                                RESULT = "null";
+                            }
+                
+                :};
+
+TIPO_TEXTO ::=   IDENTIFICADOR:a {: RESULT = (String)a; :}
+                |NUMERO:a {: RESULT = (String)a; :}
+                |{: RESULT = ""; :};
+
+CADENA_ASIG_STRING ::=  COMA IDENTIFICADOR:a {:nombre=(String) a; correcto = true;
+                            if(tablaSimbolosVariables.buscarSimbolo(nombre)){
+                                correcto = false;
+                                ErrorG e = new ErrorG(aright+1,aleft+1,(String) a,"Semantico","El simbolo "+(String) a+" ya existe");
+                                parser.listaErrores.add(e);
+                                System.out.println("Semantico: El simbolo "+(String) a+" ya existe");
+                            }
+                            
+                            :} IGUAL CONCATENACION:b {:texto = (String)b;
+                                SimboloObject s = new SimboloObject(nombre, "String", texto);
+                                if(correcto){
+                                    System.out.println("agrego: "+entero);
+                                    tablaSimbolosVariables.agregarSimbolo(s);
+                                }
+                        :} CADENA_ASIG_STRING
+
+                        |COMA IDENTIFICADOR:a {:nombre=(String) a; correcto = true;
+                            if(tablaSimbolosVariables.buscarSimbolo(nombre)){
+                                correcto = false;
+                                ErrorG e = new ErrorG(aright+1,aleft+1,(String) a,"Semantico","El simbolo "+(String) a+" ya existe");
+                                parser.listaErrores.add(e);
+                                System.out.println("Semantico: El simbolo "+(String) a+" ya existe");
+                            }
+                            SimboloObject s = new SimboloObject(nombre, "String", "");
+                            if(correcto){
+                                System.out.println("agrego: "+entero);
+                                tablaSimbolosVariables.agregarSimbolo(s);
+                            }
+                            :} CADENA_ASIG_STRING
+                        |;
+
+ASIG_VARS_BOOLEAN ::=    IGUAL OPERACION_BOOLEANA:a {:
+                            
+                            if(correcto && verificadorDatos.verificarTipoObjeto(a)==2){
+                                
+                                SimboloObject s = new SimboloObject(nombre, "Booleano", a);
+                                System.out.println("agrego: "+entero);
+                                tablaSimbolosVariables.agregarSimbolo(s);
+                                
+                            }
+                        
+                        :} CADENA_ASIG_BOOLEAN
+                        | {:
+                            SimboloObject s = new SimboloObject(nombre, "Booleano", false);
+                            if(correcto){
+                                //System.out.println("agrego: "+entero);
+                                tablaSimbolosVariables.agregarSimbolo(s);
+                            }
+                            
+                            :} CADENA_ASIG_BOOLEAN;
+
+TIPO_BOOL ::=    TRUE {:RESULT = true;:}
+                |FALSE {:RESULT = false;:};
+
+CADENA_ASIG_BOOLEAN ::=  COMA IDENTIFICADOR:a {:nombre=(String) a; correcto = true;
+                            if(tablaSimbolosVariables.buscarSimbolo(nombre)){
+                                correcto = false;
+                                ErrorG e = new ErrorG(aright+1,aleft+1,(String) a,"Semantico","El simbolo "+(String) a+" ya existe");
+                                parser.listaErrores.add(e);
+                                System.out.println("Semantico: El simbolo "+(String) a+" ya existe");
+                            }
+                            
+                            :} IGUAL OPERACION_BOOLEANA:b {:
+                            if(correcto && verificadorDatos.verificarTipoObjeto(b)==2){
+                                
+                                SimboloObject s = new SimboloObject(nombre, "Booleano", b);
+                                System.out.println("agrego: "+entero);
+                                tablaSimbolosVariables.agregarSimbolo(s);
+                                
+                            }
+                            
+                            :} CADENA_ASIG_BOOLEAN
+
+		       	|COMA IDENTIFICADOR:a {:nombre=(String) a; correcto = true;
+                            if(tablaSimbolosVariables.buscarSimbolo(nombre)){
+                                correcto = false;
+                                ErrorG e = new ErrorG(aright+1,aleft+1,(String) a,"Semantico","El simbolo "+(String) a+" ya existe");
+                                parser.listaErrores.add(e);
+                                System.out.println("Semantico: El simbolo "+(String) a+" ya existe");
+                            }
+                            
+                            :} CADENA_ASIG_BOOLEAN
+                        |;
+
+LO ::= LO_QUE_SEA LO
+        |;
+
+LOA ::= LO_QUE_SEA_SALTO LOA
+        |;
+
+LO_QUE_SEA ::=   CORCHETE_A 
+                | CORCHETE_C | DOS_PUNTOS | COMA | COMILLAS | LLAVES_A | LLAVES_C | IDENTIFICADOR | PUNTO_COMA
+                |VARS | IGUAL | MAS | MENOS | ASTERISCO | MENOR_QUE | MAYOR_QUE | PARENTESIS_A | PARENTESIS_C | PUNTO
+                |INT | STRING | BOOLEAN | IF | ELSE | WHILE | AND | OR | INSTRUCCIONES | PINTAR | NUMERO
+                |TRUE | FALSE | MAYOR_IGUAL | MENOR_IGUAL | IGUAL_IGUAL | DIFERENTE | PUNTO_PUNTO;
+
+
+LO_QUE_SEA_SALTO ::= CORCHETE_A 
+                | CORCHETE_C | DOS_PUNTOS | COMA | COMILLAS | LLAVES_A | LLAVES_C | IDENTIFICADOR | PUNTO_COMA
+                |VARS | IGUAL | MAS | MENOS | MENOR_QUE | MAYOR_QUE | PARENTESIS_A | PARENTESIS_C | PUNTO
+                |INT | STRING | BOOLEAN | IF | ELSE | WHILE | AND | OR | INSTRUCCIONES | PINTAR | NUMERO
+                |TRUE | FALSE | MAYOR_IGUAL | MENOR_IGUAL | IGUAL_IGUAL | DIFERENTE | PUNTO_PUNTO |SALTO;
+
+
+OPERADOR_RACIONAL ::=    IGUAL_IGUAL {:RESULT = 1;:}
+                        |MENOR_QUE {:RESULT = 2;:}
+			|MAYOR_QUE {:RESULT = 3;:}
+			|MAYOR_IGUAL {:RESULT = 4;:}
+			|MENOR_IGUAL {:RESULT = 5;:}
+			|DIFERENTE {:RESULT = 6;:};
+
+OPERACION_BOOLEANA ::=   DATOS_BOOLEANOS:a OPERADOR_RACIONAL:o DATOS_BOOLEANOS:b {:
+                            verificadorDatos.verificar(a,b, (int) o);
+                            if(!verificadorDatos.existeError){
+                                System.out.println(" -----"+verificadorDatos.resultado);
+                                boleano = verificadorDatos.resultado;
+                                //RESULT = verificadorDatos.resultado;
+                            }else{
+                                correcto = false;
+                                ErrorG e = new ErrorG(aright+1,aleft+1,(String) a,"Semantico","El simbolo "+(String) a+" no existe o no tiene valor");
+                                parser.listaErrores.add(e);
+                                System.out.println("Semantico: El simbolo "+(String) a+" no existe o no tiene valor");
+                                //RESULT = false;
+                                boleano = false;
+                            }
+                           
+                        :} OPERADOR_LOGICO {:RESULT = boleano;:} 
+                        |IDENTIFICADOR:a {:
+                            Object obje = tablaSimbolosVariables.getObjetoC((String) a);
+                            if(obje!=null){
+                                RESULT = obje;
+                            }else{
+                                correcto = false;
+                                ErrorG e = new ErrorG(aright+1,aleft+1,(String) a,"Semantico","El simbolo "+(String) a+" no existe o no tiene valor");
+                                parser.listaErrores.add(e);
+                                System.out.println("Semantico: El simbolo "+(String) a+" no existe o no tiene valor");
+                                RESULT = false;
+                            }
+                
+                        :}
+                        |TIPO_BOOL:a {:RESULT = a;:}; 
+
+DATOS_BOOLEANOS ::=  DATOS_BOOLEANOS:a MAS DATOS_BOOLEANOS:b {: 
+                        if(verificadorDatos.verificarTipoDato(a) && verificadorDatos.verificarTipoDato(b)){
+                            int val1 = verificadorDatos.convertirNumero(a);
+                            int val2 = verificadorDatos.convertirNumero(b);
+                            int r = val1 + val2;
+                            System.out.println("valor: "+r);
+                            RESULT = r;
+                        }else{
+                            String tex = a+""+b;
+                            RESULT = tex;
+                        }
+                    :}
+                    |DATOS_BOOLEANOS:a MENOS DATOS_BOOLEANOS:b {: 
+                        if(verificadorDatos.verificarTipoDato(a) && verificadorDatos.verificarTipoDato(b)){
+                            int val1 = verificadorDatos.convertirNumero(a);
+                            int val2 = verificadorDatos.convertirNumero(b);
+                            int r = val1 - val2;
+                            System.out.println("valor: "+r);
+                            RESULT = r;
+                        }else{
+                            correcto = false;
+                            ErrorG e = new ErrorG(aright+1,aleft+1,(String) a,"Semantico","El simbolo "+a+" o "+b+" no son del mismo tipo de variable");
+                            parser.listaErrores.add(e);
+                            System.out.println("Semantico: El simbolo "+a+" o "+b+" no son del mismo tipo de variable");
+                            RESULT = "";
+                        }
+                    :}
+                    |DATOS_BOOLEANOS:a ASTERISCO DATOS_BOOLEANOS:b {: 
+                        if(verificadorDatos.verificarTipoDato(a) && verificadorDatos.verificarTipoDato(b)){
+                            int val1 = verificadorDatos.convertirNumero(a);
+                            int val2 = verificadorDatos.convertirNumero(b);
+                            int r = val1 * val2;
+                            System.out.println("valor: "+r);
+                            RESULT = r;
+                        }else{
+                            correcto = false;
+                            ErrorG e = new ErrorG(aright+1,aleft+1,(String) a,"Semantico","El simbolo "+a+" o "+b+" no son del mismo tipo de variable");
+                            parser.listaErrores.add(e);
+                            System.out.println("Semantico: El simbolo "+a+" o "+b+" no son del mismo tipo de variable");
+                            RESULT = "";
+                        }
+                    :}
+                    |DATOS_BOOLEANOS:a DIAGONAL DATOS_BOOLEANOS:b {: 
+                        if(verificadorDatos.verificarTipoDato(a) && verificadorDatos.verificarTipoDato(b)){
+                            int val1 = verificadorDatos.convertirNumero(a);
+                            int val2 = verificadorDatos.convertirNumero(b);
+                            int r = val1 / val2;
+                            System.out.println("valor: "+r);
+                            RESULT = r;
+                        }else{
+                            correcto = false;
+                            ErrorG e = new ErrorG(aright+1,aleft+1,(String) a,"Semantico","El simbolo "+a+" o "+b+" no son del mismo tipo de variable");
+                            parser.listaErrores.add(e);
+                            System.out.println("Semantico: El simbolo "+a+" o "+b+" no son del mismo tipo de variable");
+                            RESULT = "";
+                        }
+                    :}
+                    |NUMERO:a  {: RESULT = (String)a; :}
+                    |COMILLAS TIPO_TEXTO:a COMILLAS {: RESULT = (String)a; :}
+                    |IDENTIFICADOR:a {:
+                            Object obje = tablaSimbolosVariables.getObjetoC((String) a);
+                            if(obje!=null){
+                                RESULT = obje;
+                            }else{
+                                correcto = false;
+                                ErrorG e = new ErrorG(aright+1,aleft+1,(String) a,"Semantico","El simbolo "+(String) a+" no existe o no tiene valor");
+                                parser.listaErrores.add(e);
+                                System.out.println("Semantico: El simbolo "+(String) a+" no existe o no tiene valor");
+                                RESULT = 0;
+                            }
+                
+                        :};
+
+
+
+OPERADOR_LOGICO ::= OPERA_LOGICA:n DATOS_BOOLEANOS:a OPERADOR_RACIONAL:o DATOS_BOOLEANOS:b {:
+                            verificadorDatos.verificar(a,b, (int) o);
+                            boolean resultado2;
+                            if(!verificadorDatos.existeError){
+                                System.out.println(" -----"+verificadorDatos.resultado);
+                                resultado2 = verificadorDatos.resultado;
+                                if((int) n ==1){
+                                    if(boleano && resultado2){
+                                        boleano = true;
+                                    }else{
+                                        boleano = false;
+                                    }
+                                    
+                                }else{
+                                    
+                                    if(boleano || resultado2){
+                                        boleano = true;
+                                    }else{
+                                        boleano = false;
+                                    }
+                                }
+                            }else{
+                                correcto = false;
+                                ErrorG e = new ErrorG(aright+1,aleft+1,(String) a,"Semantico","El simbolo "+(String) a+" no existe o no tiene valor");
+                                parser.listaErrores.add(e);
+                                System.out.println("Semantico: El simbolo "+(String) a+" no existe o no tiene valor");
+                                RESULT = false;
+                                resultado2 = false;
+                            }
+                           
+                        :} OPERADOR_LOGICO {:RESULT = boleano;:} 
+		    |OPERA_LOGICA:n TIPO_BOOL:a {:
+                                boolean resultado2;
+                                resultado2 = (boolean) a;
+                            
+                                if((int) n ==1){
+                                    if(boleano && resultado2){
+                                        boleano = true;
+                                    }else{
+                                        boleano = false;
+                                    }
+                                    
+                                }else{
+                                    
+                                    if(boleano || resultado2){
+                                        boleano = true;
+                                    }else{
+                                        boleano = false;
+                                    }
+                                }
+                           
+                        :} OPERADOR_LOGICO {:RESULT = boleano;:} 
+		    |OPERA_LOGICA:n IDENTIFICADOR:a {:
+                            boolean resultado2;
+                            if(verificadorDatos.verificarTipoObjeto(a)==2){
+                                
+                                resultado2 = (boolean) a;
+                                if((int) n ==1){
+                                    if(boleano && resultado2){
+                                        boleano = true;
+                                    }else{
+                                        boleano = false;
+                                    }
+                                    
+                                }else{
+                                    
+                                    if(boleano || resultado2){
+                                        boleano = true;
+                                    }else{
+                                        boleano = false;
+                                    }
+                                }
+                            }else{
+                                correcto = false;
+                                ErrorG e = new ErrorG(aright+1,aleft+1,(String) a,"Semantico","El simbolo "+(String) a+" no existe o no tiene valor");
+                                parser.listaErrores.add(e);
+                                System.out.println("Semantico: El simbolo "+(String) a+" no existe o no tiene valor");
+                                RESULT = false;
+                                resultado2 = false;
+                            }
+                            
+                           
+                        :} OPERADOR_LOGICO
+		    | ;
+OPERA_LOGICA ::= AND {:RESULT = 1;:}
+                |OR {:RESULT = 2;:};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ESTRUCTURA_INSTRUCCIONES ::= ASIGNACION_VALORES FINALIZAR ESTRUCTURA_INSTRUCCIONES
+                            |ESTRUC_PINTAR FINALIZAR ESTRUCTURA_INSTRUCCIONES
+                            |ESTRUC_WHILE FINALIZAR ESTRUCTURA_INSTRUCCIONES
+                            |ESTRUC_IF_ELSE FINALIZAR ESTRUCTURA_INSTRUCCIONES
+                            |COMENTARIO ESTRUCTURA_INSTRUCCIONES
+                            |;
+
+ASIGNACION_VALORES ::= IDENTIFICADOR:a {:nombre = (String )a; correcto = true;:} IGUAL ASIG:b PUNTO_COMA {:
+                        if(correcto){
+                            if(verificadorDatos.verificarTipoDato(b)){
+                                SimboloObject simbol = tablaSimbolosVariables.getSimbolo(nombre);
+                                if(simbol.getTipo().equals("Int")){
+                                    tablaSimbolosVariables.modificar(nombre,"Int",b);
+                                }else{
+                                    
+                                    ErrorG e = new ErrorG(aright+1,aleft+1,(String) a,"Semantico","El simbolo "+a+" o "+b+" no son del mismo tipo de variable");
+                                    parser.listaErrores.add(e);
+                                    System.out.println("Semantico: El simbolo "+a+" o "+b+" no son del mismo tipo de variable");  
+                                }
+                            }else if(verificadorDatos.verificarTipoObjeto(b)==2){
+                                SimboloObject simbol = tablaSimbolosVariables.getSimbolo(nombre);
+                                if(simbol.getTipo().equals("Booleano")){
+                                    tablaSimbolosVariables.modificar(nombre,"Booleano",b);
+                                }else{
+                                    
+                                    ErrorG e = new ErrorG(aright+1,aleft+1,(String) a,"Semantico","El simbolo "+a+" o "+b+" no son del mismo tipo de variable");
+                                    parser.listaErrores.add(e);
+                                    System.out.println("Semantico: El simbolo "+a+" o "+b+" no son del mismo tipo de variable");  
+                                }
+                            }else{
+                                SimboloObject simbol = tablaSimbolosVariables.getSimbolo(nombre);
+                                if(simbol.getTipo().equals("String")){
+                                    tablaSimbolosVariables.modificar(nombre,"String",b);
+                                }else{
+                                    
+                                    ErrorG e = new ErrorG(aright+1,aleft+1,(String) a,"Semantico","El simbolo "+a+" o "+b+" no son del mismo tipo de variable");
+                                    parser.listaErrores.add(e);
+                                    System.out.println("Semantico: El simbolo "+a+" o "+b+" no son del mismo tipo de variable");  
+                                }
+
+                            }
+                        }
+                        
+                        :};
+
+ASIG ::= ASIG:a MAS ASIG:b {:
+        if(verificadorDatos.verificarTipoDato(a) && verificadorDatos.verificarTipoDato(b)){
+            int val1 = verificadorDatos.convertirNumero(a);
+            int val2 = verificadorDatos.convertirNumero(b);
+            int r = val1 + val2;
+            System.out.println("valor: "+r);
+            RESULT = r;
+        }else{
+            String tex = a+""+b;
+            RESULT = tex;
+        }        
+        :}
+        |ASIG:a MENOS ASIG:b {: 
+                        if(verificadorDatos.verificarTipoDato(a) && verificadorDatos.verificarTipoDato(b)){
+                            int val1 = verificadorDatos.convertirNumero(a);
+                            int val2 = verificadorDatos.convertirNumero(b);
+                            int r = val1 - val2;
+                            System.out.println("valor: "+r);
+                            RESULT = r;
+                        }else{
+                            correcto = false;
+                            ErrorG e = new ErrorG(aright+1,aleft+1,(String) a,"Semantico","El simbolo "+a+" o "+b+" no son del mismo tipo de variable");
+                            parser.listaErrores.add(e);
+                            System.out.println("Semantico: El simbolo "+a+" o "+b+" no son del mismo tipo de variable");
+                            RESULT = "";
+                        }
+                    :}
+        |ASIG:a ASTERISCO ASIG:b {: 
+                        if(verificadorDatos.verificarTipoDato(a) && verificadorDatos.verificarTipoDato(b)){
+                            int val1 = verificadorDatos.convertirNumero(a);
+                            int val2 = verificadorDatos.convertirNumero(b);
+                            int r = val1 * val2;
+                            System.out.println("valor: "+r);
+                            RESULT = r;
+                        }else{
+                            correcto = false;
+                            ErrorG e = new ErrorG(aright+1,aleft+1,(String) a,"Semantico","El simbolo "+a+" o "+b+" no son del mismo tipo de variable");
+                            parser.listaErrores.add(e);
+                            System.out.println("Semantico: El simbolo "+a+" o "+b+" no son del mismo tipo de variable");
+                            RESULT = "";
+                        }
+                    :}
+        |ASIG:a DIAGONAL ASIG:b {: 
+                        if(verificadorDatos.verificarTipoDato(a) && verificadorDatos.verificarTipoDato(b)){
+                            int val1 = verificadorDatos.convertirNumero(a);
+                            int val2 = verificadorDatos.convertirNumero(b);
+                            int r = val1 / val2;
+                            System.out.println("valor: "+r);
+                            RESULT = r;
+                        }else{
+                            correcto = false;
+                            ErrorG e = new ErrorG(aright+1,aleft+1,(String) a,"Semantico","El simbolo "+a+" o "+b+" no son del mismo tipo de variable");
+                            parser.listaErrores.add(e);
+                            System.out.println("Semantico: El simbolo "+a+" o "+b+" no son del mismo tipo de variable");
+                            RESULT = "";
+                        }
+                    :}
+        |ASIG:a OPERADOR_RACIONAL:o ASIG:b {:
+                            verificadorDatos.verificar(a,b, (int) o);
+                            if(!verificadorDatos.existeError){
+                                System.out.println(" -----"+verificadorDatos.resultado);
+                                
+                                RESULT = verificadorDatos.resultado;
+                            }else{
+                                correcto = false;
+                                ErrorG e = new ErrorG(aright+1,aleft+1,(String) a,"Semantico","El simbolo "+(String) a+" no existe o no tiene valor");
+                                parser.listaErrores.add(e);
+                                System.out.println("Semantico: El simbolo "+(String) a+" no existe o no tiene valor");
+                                RESULT = false;
+                                
+                            }
+                           
+                        :}
+        |NUMERO:a {: RESULT = (String)a; :}
+        |COMILLAS TIPO_TEXTO:a COMILLAS {: RESULT = (String)a; :}
+        |IDENTIFICADOR:a {:
+                            Object obje = tablaSimbolosVariables.getObjetoC((String) a);
+                            if(obje!=null){
+                                RESULT = obje;
+                            }else{
+                                correcto = false;
+                                ErrorG e = new ErrorG(aright+1,aleft+1,(String) a,"Semantico","El simbolo "+(String) a+" no existe o no tiene valor");
+                                parser.listaErrores.add(e);
+                                System.out.println("Semantico: El simbolo "+(String) a+" no existe o no tiene valor");
+                                RESULT = 0;
+                            }
+                
+                        :}
+        |TIPO_BOOL:a {:RESULT = a;:};
+
+
+TIPO_DATO ::=    NUMERO
+                |IDENTIFICADOR
+                |TIPO_BOOL;
+
+TIPO_PINTAR ::= PINTAR
+                |PINTAR_MIN;
+
+
+ESTRUC_PINTAR ::= TIPO_PINTAR PARENTESIS_A {:tipoIdP = 1;:} PRMT:a COMA {:tipoIdP = 2;:} PRMT:b COMA PRMT1:c COMA PRMT1:d PARENTESIS_C PUNTO_COMA {:
+
+                if(correcto){
+                    Lienzo li = parser.tablaSimbolos.getLienzo(lienzoInstruccion);
+                    Rango rX = (Rango)c;
+                    Rango rY = (Rango)d;
+                    if(li!=null){
+                        if(li.getDimensionX()<=rX.getInicio() && li.getDimensionX()<=rX.getFin() && li.getDimensionY()<=rY.getInicio() && li.getDimensionY()<=rY.getFin()){
+                            Pintar p = new Pintar(lienzoInstruccion, (String)a, (String)b, (Rango)c, (Rango)d);
+                            SimboloObject s = new SimboloObject("Pintar", lienzoInstruccion , p);
+                            tablaSimbolosPintar.agregarSimbolo(s);
+                        }else{
+                            ErrorG e = null;
+                            //error dato duplicado
+                            System.out.println("se duplico algun atributo");
+                            if(li.getDimensionX()<=rX.getInicio()){
+                                e = new ErrorG(cright+1,cleft+1,(String) a,"Semantico","El simbolo "+rX.getInicio()+" es muy grande que: "+li.getDimensionX());
+                                parser.listaErrores.add(e);
+                                System.out.println("Error Semantico: El simbolo "+rX.getInicio()+" es muy grande que: "+li.getDimensionX());
+                            }
+                            if(li.getDimensionX()<=rX.getFin()){
+                                e = new ErrorG(cright+1,cleft+1,(String) a,"Semantico","El simbolo "+rX.getFin()+" es muy grande que: "+li.getDimensionX());
+                                parser.listaErrores.add(e);
+                                System.out.println("Semantico Semantico: "+(String) a+" ------ Linea: "+(cright+1)+",   Columna: "+(cleft+1));
+                            }
+
+                            if(li.getDimensionY()<=rY.getInicio()){
+                                e = new ErrorG(dright+1,dleft+1,(String) a,"Semantico","El simbolo "+rY.getInicio()+" es muy grande que: "+li.getDimensionY());
+                                parser.listaErrores.add(e);
+                                System.out.println("Error Semantico: El simbolo "+rY.getInicio()+" es muy grande que: "+li.getDimensionY());
+                            }
+
+                            if(li.getDimensionY()<=rY.getFin()){
+                                e = new ErrorG(dright+1,dleft+1,(String) a,"Semantico","El simbolo "+rY.getFin()+" es muy grande que: "+li.getDimensionY());
+                                parser.listaErrores.add(e);
+                                System.out.println("Error Semantico: El simbolo "+rY.getFin()+" es muy grande que: "+li.getDimensionY());
+                            }
+                        }
+                    }
+                    
+                }
+
+:};
+
+
+PRMT ::= PRMT:a MAS PRMT:b {:
+        if(verificadorDatos.verificarTipoDato(a) && verificadorDatos.verificarTipoDato(b)){
+            int val1 = verificadorDatos.convertirNumero(a);
+            int val2 = verificadorDatos.convertirNumero(b);
+            int r = val1 + val2;
+            System.out.println("valor: "+r);
+            RESULT = r;
+        }else{
+            String tex = a+""+b;
+            RESULT = tex;
+        }        
+        :}
+	|PRMT:a MENOS PRMT:b {: 
+                        if(verificadorDatos.verificarTipoDato(a) && verificadorDatos.verificarTipoDato(b)){
+                            int val1 = verificadorDatos.convertirNumero(a);
+                            int val2 = verificadorDatos.convertirNumero(b);
+                            int r = val1 - val2;
+                            System.out.println("valor: "+r);
+                            RESULT = r;
+                        }else{
+                            correcto = false;
+                            ErrorG e = new ErrorG(aright+1,aleft+1,(String) a,"Semantico","El simbolo "+a+" o "+b+" no son del mismo tipo de variable");
+                            parser.listaErrores.add(e);
+                            System.out.println("Semantico: El simbolo "+a+" o "+b+" no son del mismo tipo de variable");
+                            RESULT = "";
+                        }
+                    :}
+	|PRMT:a ASTERISCO PRMT:b {: 
+                        if(verificadorDatos.verificarTipoDato(a) && verificadorDatos.verificarTipoDato(b)){
+                            int val1 = verificadorDatos.convertirNumero(a);
+                            int val2 = verificadorDatos.convertirNumero(b);
+                            int r = val1 * val2;
+                            System.out.println("valor: "+r);
+                            RESULT = r;
+                        }else{
+                            correcto = false;
+                            ErrorG e = new ErrorG(aright+1,aleft+1,(String) a,"Semantico","El simbolo "+a+" o "+b+" no son del mismo tipo de variable");
+                            parser.listaErrores.add(e);
+                            System.out.println("Semantico: El simbolo "+a+" o "+b+" no son del mismo tipo de variable");
+                            RESULT = "";
+                        }
+                    :}
+	|PRMT:a DIAGONAL PRMT:b {: 
+                        if(verificadorDatos.verificarTipoDato(a) && verificadorDatos.verificarTipoDato(b)){
+                            int val1 = verificadorDatos.convertirNumero(a);
+                            int val2 = verificadorDatos.convertirNumero(b);
+                            int r = val1 / val2;
+                            System.out.println("valor: "+r);
+                            RESULT = r;
+                        }else{
+                            correcto = false;
+                            ErrorG e = new ErrorG(aright+1,aleft+1,(String) a,"Semantico","El simbolo "+a+" o "+b+" no son del mismo tipo de variable");
+                            parser.listaErrores.add(e);
+                            System.out.println("Semantico: El simbolo "+a+" o "+b+" no son del mismo tipo de variable");
+                            RESULT = "";
+                        }
+                    :}
+	|COMILLAS TIPO_TEXTO:a COMILLAS {: RESULT = (String)a; :}
+	|NUMERO:a {: RESULT = (String)a; :}
+	|IDENTIFICADOR:a {:  int existeVa = 0;
+                            Object obje = tablaSimbolosVariables.getObjetoC((String) a);
+                            if(obje!=null){
+                                existeVa = 1;
+                            }
+                            
+                            if(tipoIdP==1 && existeVa==0){
+                                obje = parser.tablaSimbolosColores.getObjetoN((String) a, lienzoInstruccion);
+                            }else if(tipoIdP==2 && existeVa==0){
+                                obje = parser.tablaSimbolosImagenes.getObjetoN((String) a, lienzoInstruccion);
+                            }
+
+                            if(obje!=null){
+                                RESULT = obje;
+                            }else{
+                                correcto = false;
+                                ErrorG e = new ErrorG(aright+1,aleft+1,(String) a,"Semantico","El simbolo "+(String) a+" no existe o no tiene valor");
+                                parser.listaErrores.add(e);
+                                System.out.println("Semantico: El simbolo "+(String) a+" no existe o no tiene valor");
+                                RESULT = 0;
+                            }
+                
+                        :};
+
+PRMT1 ::=    OPERACION:a PUNTO_PUNTO OPERACION:b {:RESULT = new Rango(verificadorDatos.convertirNumero(a),verificadorDatos.convertirNumero(b));:}
+            |OPERACION:a {:RESULT = new Rango(verificadorDatos.convertirNumero(a),verificadorDatos.convertirNumero(a));:};
+
+
+
+
+
+
+ESTRUC_WHILE ::= WHILE PARENTESIS_A CONDICION_L:a PARENTESIS_C LLAVES_A FINALIZAR CONTENIDO LLAVES_C;
+
+CONDICION_L ::=  OPERACION_BOOLEANA:a {: RESULT = a; :};
+
+
+CONTENIDO ::= ESTRUCTURA_INSTRUCCIONES;
+
+ESTRUC_IF_ELSE::= IF PARENTESIS_A CONDICION_L:a PARENTESIS_C LLAVES_A FINALIZAR CONTENIDO LLAVES_C ESTRUC_ELSE;
+
+ESTRUC_ELSE ::=  ELSE LLAVES_A FINALIZAR CONTENIDO LLAVES_C
+		|;

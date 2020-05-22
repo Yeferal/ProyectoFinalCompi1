@@ -1,0 +1,219 @@
+//codigo usuario
+package analizadores.inz;
+import java_cup.runtime.Symbol;
+import java.util.ArrayList;
+import objetos.Lienzo;
+import objetos.ErrorG;
+import tablas.*;
+
+//Codigo para el parser, variables, metodos
+parser code
+{:
+    TablaSimbolos tablaSimbolos;
+    public ArrayList<ErrorG> listaErrores = new  ArrayList<>();
+    
+    public void setTabla(TablaSimbolos tablaSimbolos){
+        this.tablaSimbolos = tablaSimbolos; 
+    }
+
+    public TablaSimbolos getTabla(){
+        return tablaSimbolos; 
+    }
+
+
+
+
+
+    private Symbol s;
+    public void syntaxError(Symbol s){
+        this.s = s;
+    }
+    public Symbol getS(Symbol s){
+        return this.s = s;
+    }
+
+    public void setAccion(String tipo,String mensaje,String accion){
+            System.out.println(tipo+"         "+mensaje);
+        }
+
+    public void syntax_error(Symbol s){
+            if(s!=null){
+                ErrorG e = new ErrorG(s.right,s.left,(String) s.value,"Sintactico","Error Sintaxis token: "+(String) s.value+" ------ Linea: " + (s.right+1) + ",   Columna: " + (s.left+1));
+                listaErrores.add(e);
+                setAccion("ERROR","Error Sintaxis token: Linea: " + (s.right+1) + ",   Columna: " + (s.left+1) + ",  Simbolo: " + s.value, "");
+            }
+    }
+
+:}
+
+//Coidgo para las acciones gramaticales
+
+action code
+{:
+    TablaSimbolos tablaSimbolos = new TablaSimbolos();
+    Lienzo lienzo;
+    boolean correcto;
+:}
+
+//Declaraciones 
+terminal DOS_PUNTOS, COMA, COMILLAS, LLAVES_A, LLAVES_C;
+terminal LIENZOS,TAMANIO, IDENTIFICADOR, NUMERO,FONDO, CODIGO_HEX;
+terminal NOMBRE, TIPO, PNG, GIF, HEX, RED, BLUE, GREEN, CUADRO, DIMENSION_X, DIMENSION_Y;
+
+// declaracion no terminales
+non terminal INICIO, ESTRUCTURA_LIENZOS, ESTRUCTURA_PARAMETROS, S0, PARAMETROS, ATRIBUTOS, TIPO_IMAGEN;
+non terminal ESTRUCTURA_FONDO, ATRIB_RGB, ATRIB_HEX, ESTRUCTURA_TAMANIO, ATRIB_TAMANIO, IDENTIFICADORES;
+
+//presedencia de menor a mayor
+//precedence left NOMBRE, PALABRA;
+
+
+start with INICIO;
+
+//Reglas Semanticas
+
+
+INICIO ::= LLAVES_A ESTRUCTURA_LIENZOS LLAVES_C {: parser.setTabla(tablaSimbolos); :}
+          |error:e ESTRUCTURA_PARAMETROS {:parser.syntax_error((Symbol)e);:}
+          |error:e ATRIBUTOS {:parser.syntax_error((Symbol)e);:}
+          |error:e PARAMETROS {:parser.syntax_error((Symbol)e);:};
+
+ESTRUCTURA_LIENZOS ::= LIENZOS DOS_PUNTOS LLAVES_A ESTRUCTURA_PARAMETROS LLAVES_C;
+
+ESTRUCTURA_PARAMETROS ::= IDENTIFICADOR:a {:lienzo = new Lienzo(); correcto = true; :} DOS_PUNTOS LLAVES_A PARAMETROS LLAVES_C 
+                    {:
+                    if(tablaSimbolos.buscarSimbolo((String) a)){
+                        ErrorG e = new ErrorG(aright+1,aleft+1,(String) a,"Semantico","El simbolo "+(String) a+" ya existe");
+                        parser.listaErrores.add(e);
+                        System.out.println("Semantico: El simbolo "+(String) a+" ya existe");
+                    }else{
+                        if(correcto){
+                            SimboloObject simbolo = new SimboloObject((String) a, "Lienzo", lienzo);
+                            tablaSimbolos.agregarSimbolo(simbolo);
+                        }
+                    }
+                    :} S0;
+
+S0 ::=   COMA ESTRUCTURA_PARAMETROS
+        |;
+
+PARAMETROS ::= ATRIBUTOS:a COMA:g ATRIBUTOS:b COMA:h ATRIBUTOS:c COMA:i ATRIBUTOS:d {:
+                        int a1 = (int) a;
+                        int a2 = (int) b;
+                        int a3 = (int) c;
+                        int a4 = (int) d;
+                        if(a1==a2 || a1==a3 || a1==a4 || a2==a3 || a2==a4 || a3==a4){
+                            correcto = false;
+                            ErrorG e = null;
+                            //error dato duplicado
+                            System.out.println("se duplico algun atributo");
+                            if(a1==a2){
+                                e = new ErrorG(bright+1,bleft+1,(String) a,"Sintactico","Error Sintaxis token: "+(String) a+" ------ Linea: "+(bright+1)+",   Columna: "+(bleft+1));
+                                System.out.println("Error Sintaxis token: "+(String) a+" ------ Linea: "+(bright+1)+",   Columna: "+(bleft+1));
+                            }
+                            if(a1==a3){
+                                e = new ErrorG(cright+1,cleft+1,(String) a,"Sintactico","Error Sintaxis token: "+(String) a+" ------ Linea: "+(cright+1)+",   Columna: "+(cleft+1));
+                                System.out.println("Error Sintaxis token: "+(String) a+" ------ Linea: "+(cright+1)+",   Columna: "+(cleft+1));
+                            }
+                            if(a1==a4){
+                                e = new ErrorG(dright+1,dleft+1,(String) a,"Sintactico","Error Sintaxis token: "+(String) a+" ------ Linea: "+(dright+1)+",   Columna: "+(dleft+1));
+                                System.out.println("Error Sintaxis token: "+(String) a+" ------ Linea: "+(dright+1)+",   Columna: "+(dleft+1));
+                            }
+                            if(a2==a3){
+                                e = new ErrorG(cright+1,cleft+1,(String) a,"Sintactico","Error Sintaxis token: "+(String) a+" ------ Linea: "+(cright+1)+",   Columna: "+(cleft+1));
+                                System.out.println("Error Sintaxis token: "+(String) a+" ------ Linea: "+(cright+1)+",   Columna: "+(cleft+1));
+                            }
+                            if(a2==a4){
+                                e = new ErrorG(dright+1,dleft+1,(String) a,"Sintactico","Error Sintaxis token: "+(String) a+" ------ Linea: "+(dright+1)+",   Columna: "+(dleft+1));
+                                System.out.println("Error Sintaxis token: "+(String) a+" ------ Linea: "+(dright+1)+",   Columna: "+(dleft+1));
+                            }
+                            if(a3==a4){
+                                e = new ErrorG(dright+1,dleft+1,(String) a,"Sintactico","Error Sintaxis token: "+(String) a+" ------ Linea: "+(dright+1)+",   Columna: "+(dleft+1));
+                                System.out.println("Error Sintaxis token: "+(String) a+" ------ Linea: "+(bright+1)+",   Columna: "+(bleft+1));
+                            }
+                            
+                            parser.listaErrores.add(e);
+                        }
+                    :};
+
+ATRIBUTOS ::=    NOMBRE DOS_PUNTOS COMILLAS IDENTIFICADORES:a COMILLAS {: lienzo.setNombre((String) a); RESULT = 1;:}
+                |TIPO DOS_PUNTOS COMILLAS TIPO_IMAGEN:a COMILLAS {: lienzo.setTipo((String) a); RESULT = 2;:}
+                |FONDO DOS_PUNTOS LLAVES_A ESTRUCTURA_FONDO LLAVES_C {: RESULT = 3;:}
+                |TAMANIO DOS_PUNTOS LLAVES_A ESTRUCTURA_TAMANIO LLAVES_C {: RESULT = 4;:};
+
+IDENTIFICADORES ::= IDENTIFICADOR:a IDENTIFICADORES:b 
+                    {:  String t = " ";
+                        if(b!=null){
+                            t = (String)a+" "+(String)b;
+                        }else{
+                            t = (String)a;
+                        } 
+                        System.out.println("entro a intificadores id: "+(String)t); 
+                        RESULT = (String)t; 
+                        
+                    :}
+                    |NUMERO:a IDENTIFICADORES:b 
+                    {:  String t = " ";
+                        if(b!=null){
+                            t = (String)a+" "+(String)b;
+                        }else{
+                            t = (String)a;
+                        } 
+                        System.out.println("entro a intificadores id: "+(String)t); 
+                        RESULT = (String)t; 
+                        
+                    :}
+                    | ;
+
+TIPO_IMAGEN ::=  PNG {: RESULT = "png";:}
+		|GIF {: RESULT = "gif";:};
+
+ESTRUCTURA_FONDO ::= ATRIB_RGB:a COMA ATRIB_RGB:b COMA ATRIB_RGB:c {: lienzo.setTipoFondo(1);
+                        int a1 = (int) a;
+                        int a2 = (int) b;
+                        int a3 = (int) c;
+                        if(a1==a2 || a1==a3 || a2==a3){
+                            correcto = false;
+                            ErrorG e = null;
+                            //error dato duplicado
+                            System.out.println("se duplico algun atributo");
+                            if(a1==a2){
+                                e = new ErrorG(bright+1,bleft+1,(String) a,"Sintactico","Error Sintaxis token: "+(String) a+" ------ Linea: "+(bright+1)+",   Columna: "+(bleft+1));
+                                System.out.println("Error Sintaxis token: "+(String) a+" ------ Linea: "+(bright+1)+",   Columna: "+(bleft+1));
+                            }
+                            if(a1==a3){
+                                e = new ErrorG(cright+1,cleft+1,(String) a,"Sintactico","Error Sintaxis token: "+(String) a+" ------ Linea: "+(cright+1)+",   Columna: "+(cleft+1));
+                                System.out.println("Error Sintaxis token: "+(String) a+" ------ Linea: "+(cright+1)+",   Columna: "+(cleft+1));
+                            }
+
+                            if(a2==a3){
+                                e = new ErrorG(cright+1,cleft+1,(String) a,"Sintactico","Error Sintaxis token: "+(String) a+" ------ Linea: "+(cright+1)+",   Columna: "+(cleft+1));
+                                System.out.println("Error Sintaxis token: "+(String) a+" ------ Linea: "+(cright+1)+",   Columna: "+(cleft+1));
+                            }
+                            
+                            parser.listaErrores.add(e);
+                        }
+                    :}
+                    |ATRIB_HEX {: lienzo.setTipoFondo(2); :};
+
+ATRIB_RGB ::= 	 RED DOS_PUNTOS NUMERO:r {: lienzo.setRed(Integer.parseInt((String) r)); RESULT = 1;:}
+                |BLUE DOS_PUNTOS NUMERO:b {: lienzo.setBlue(Integer.parseInt((String) b)); RESULT = 2;:}
+		|GREEN DOS_PUNTOS NUMERO:g {: lienzo.setGreen(Integer.parseInt((String) g)); RESULT = 3;:};
+
+ATRIB_HEX ::= HEX DOS_PUNTOS CODIGO_HEX:h {: lienzo.setFondoHEX((String) h); :};
+
+ESTRUCTURA_TAMANIO ::= ATRIB_TAMANIO:a COMA ATRIB_TAMANIO:b COMA ATRIB_TAMANIO:c {:
+                        int a1 = (int) a;
+                        int a2 = (int) b;
+                        int a3 = (int) c;
+                        if(a1==a2 || a1==a3 || a2==a3){
+                            correcto = false;
+                            //error dato duplicado
+                            System.out.println("se duplico algun atributo");
+                        }
+                    :};
+
+ATRIB_TAMANIO ::=    CUADRO DOS_PUNTOS NUMERO:c {: lienzo.setCuadro(Integer.parseInt((String) c)); RESULT = 1;:}
+                    |DIMENSION_X DOS_PUNTOS NUMERO:x {: lienzo.setDimensionX(Integer.parseInt((String) x)); RESULT = 2;:}
+		    |DIMENSION_Y DOS_PUNTOS NUMERO:y {: lienzo.setDimensionY(Integer.parseInt((String) y)); RESULT = 3;:};
+

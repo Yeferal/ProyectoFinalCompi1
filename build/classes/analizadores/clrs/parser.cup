@@ -1,0 +1,156 @@
+//codigo usuario
+package analizadores.clrs;
+import java_cup.runtime.Symbol;
+import java.util.ArrayList;
+import objetos.*;
+import tablas.*;
+
+//Codigo para el parser, variables, metodos
+parser code
+{:
+    TablaSimbolos tablaSimbolos;
+    TablaSimbolos tablaSimbolosColor;
+    public ArrayList<ErrorG> listaErrores = new  ArrayList<>();
+    
+    public void setTablaColor(TablaSimbolos tablaSimbolosColor){
+        this.tablaSimbolosColor = tablaSimbolosColor; 
+    }
+
+    public TablaSimbolos getTablaColor(){
+        return tablaSimbolosColor; 
+    }
+    public void setTabla(TablaSimbolos tablaSimbolos){
+        this.tablaSimbolos = tablaSimbolos; 
+    }
+
+    public TablaSimbolos getTabla(){
+        return tablaSimbolos; 
+    }
+
+    private Symbol s;
+    public void syntaxError(Symbol s){
+        this.s = s;
+    }
+    public Symbol getS(Symbol s){
+        return this.s = s;
+    }
+
+    public void setAccion(String tipo,String mensaje,String accion){
+            System.out.println(tipo+"         "+mensaje);
+        }
+
+    public void syntax_error(Symbol s){
+            if(s!=null){
+                ErrorG e = new ErrorG(s.right,s.left,(String) s.value,"Sintactico","Error Sintaxis token: "+(String) s.value+" ------ Linea: " + (s.right+1) + ",   Columna: " + (s.left+1));
+                listaErrores.add(e);
+                setAccion("ERROR","Error Sintaxis token: Linea: " + (s.right+1) + ",   Columna: " + (s.left+1) + ",  Simbolo: " + s.value, "");
+            }
+    }
+
+:}
+
+//Coidgo para las acciones gramaticales
+
+action code
+{:
+    TablaSimbolos tablaSimbolos = new TablaSimbolos();
+    TablaSimbolos tablaColores = new TablaSimbolos();
+    Lienzo lienzo;
+    Color color;
+    String nombreLienzo;
+    boolean correcto;
+    boolean existeLienzo;
+:}
+
+//Declaraciones 
+terminal CORCHE_A, CORCHE_C, DOS_PUNTOS, COMA, COMILLAS, LLAVES_A, LLAVES_C;
+terminal COLORES,TAMANIO, IDENTIFICADOR, NUMERO,FONDO, CODIGO_HEX;
+terminal NOMBRE, TIPO, PNG, GIF, HEX, RED, BLUE, GREEN, CUADRO, DIMENSION_X, DIMENSION_Y;
+
+// declaracion no terminales
+non terminal INICIO, ESTRUCTURA_COLORES, ESTRUCTURA_PARAMETROS, S0, S1, PARAMETROS, ESTRUCTURA_FONDO;
+non terminal ATRIB_RGB, ATRIB_HEX;
+
+//presedencia de menor a mayor
+//precedence left NOMBRE, PALABRA;
+
+
+start with INICIO;
+
+//Reglas Semanticas
+
+
+INICIO ::=  LLAVES_A ESTRUCTURA_COLORES LLAVES_C
+           |error:e ESTRUCTURA_PARAMETROS {:parser.syntax_error((Symbol)e);:}
+           |error:e ESTRUCTURA_FONDO {:parser.syntax_error((Symbol)e);:};
+
+ESTRUCTURA_COLORES ::= COLORES {:tablaSimbolos = parser.getTabla();:} DOS_PUNTOS LLAVES_A ESTRUCTURA_PARAMETROS LLAVES_C {: parser.setTablaColor(tablaColores); :};
+
+ESTRUCTURA_PARAMETROS ::= IDENTIFICADOR:a {:
+                        nombreLienzo = (String) a;
+                        if(tablaSimbolos.buscarSimboloTipo((String) a,"Lienzo")){
+                            existeLienzo = true;
+                        }else{
+                            existeLienzo = false;
+                            ErrorG e = new ErrorG(aright+1,aleft+1,(String) a,"Semantico","El simbolo "+(String) a+" Tipo Lienzo NO EXISTE");
+                            parser.listaErrores.add(e);
+                            System.out.println("Semantico: El simbolo "+(String) a+" Tipo Lienzo NO EXISTE");
+                        }
+                        
+                        
+                        :} DOS_PUNTOS LLAVES_A PARAMETROS LLAVES_C S0;
+
+S0 ::= 	  COMA ESTRUCTURA_PARAMETROS
+	| ;
+
+PARAMETROS ::= IDENTIFICADOR:a {:color = new Color(); color.setNombre((String) a);  correcto = true; :} DOS_PUNTOS LLAVES_A ESTRUCTURA_FONDO LLAVES_C {:
+            if(existeLienzo && correcto){
+                if(!tablaColores.buscarSimboloTipo((String) a, nombreLienzo)){
+                    SimboloObject simbolo = new SimboloObject((String) a, nombreLienzo, color);
+                    tablaColores.agregarSimbolo(simbolo);
+                }else{
+                    ErrorG e = new ErrorG(aright+1,aleft+1,(String) a,"Semantico","El simbolo "+(String) a+" Tipo Color YA EXISTE");
+                    parser.listaErrores.add(e);
+                    System.out.println("Semantico: El simbolo "+(String) a+" Tipo Color YA EXISTE");
+                }
+            }
+            
+            
+            :} S1;
+
+S1 ::= 	  COMA PARAMETROS
+	| ;
+
+ESTRUCTURA_FONDO ::= ATRIB_RGB:a COMA ATRIB_RGB:b COMA ATRIB_RGB:c {: color.setTipoFondo(1);
+                        int a1 = (int) a;
+                        int a2 = (int) b;
+                        int a3 = (int) c;
+                        if(a1==a2 || a1==a3 || a2==a3){
+                            correcto = false;
+                            ErrorG e = null;
+                            //error dato duplicado
+                            System.out.println("se duplico algun atributo");
+                            if(a1==a2){
+                                e = new ErrorG(bright+1,bleft+1,(String) a,"Sintactico","Error Sintaxis token: "+(String) a+" ------ Linea: "+(bright+1)+",   Columna: "+(bleft+1));
+                                System.out.println("Error Sintaxis token: "+(String) a+" ------ Linea: "+(bright+1)+",   Columna: "+(bleft+1));
+                            }
+                            if(a1==a3){
+                                e = new ErrorG(cright+1,cleft+1,(String) a,"Sintactico","Error Sintaxis token: "+(String) a+" ------ Linea: "+(cright+1)+",   Columna: "+(cleft+1));
+                                System.out.println("Error Sintaxis token: "+(String) a+" ------ Linea: "+(cright+1)+",   Columna: "+(cleft+1));
+                            }
+
+                            if(a2==a3){
+                                e = new ErrorG(cright+1,cleft+1,(String) a,"Sintactico","Error Sintaxis token: "+(String) a+" ------ Linea: "+(cright+1)+",   Columna: "+(cleft+1));
+                                System.out.println("Error Sintaxis token: "+(String) a+" ------ Linea: "+(cright+1)+",   Columna: "+(cleft+1));
+                            }
+                            
+                            parser.listaErrores.add(e);
+                        }
+                    :}
+                    |ATRIB_HEX {:color.setTipoFondo(2);:};
+
+ATRIB_RGB ::= 	 RED DOS_PUNTOS NUMERO:r {: color.setRed(Integer.parseInt((String) r)); RESULT = 1;:}
+                |BLUE DOS_PUNTOS NUMERO:b {: color.setBlue(Integer.parseInt((String) b)); RESULT = 2;:}
+		|GREEN DOS_PUNTOS NUMERO:g {: color.setGreen(Integer.parseInt((String) g)); RESULT = 3;:};
+
+ATRIB_HEX ::= HEX DOS_PUNTOS CODIGO_HEX:h {: color.setFondoHEX((String) h); :};
