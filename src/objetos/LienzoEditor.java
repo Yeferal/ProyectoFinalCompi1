@@ -51,6 +51,7 @@ public class LienzoEditor {
     public JTextField  textoCantidad = new JTextField();
     public JTextField  textoInicio = new JTextField();
     public JTextField  textoFin = new JTextField();
+    public JPanel p;
     int bandera, idImagenN;
     
     public void agregarColor(Color c){
@@ -91,12 +92,12 @@ public class LienzoEditor {
         botonColores.setBounds(180, 500, 20, 20);
         botonColores.setBackground(java.awt.Color.WHITE);
         
-        JPanel p =  new JPanel();
+        p =  new JPanel();
         
 
         agregarListaColores(p);
 
-        scrool.setViewportView(p);
+        
         
         agregarColores();
         llenarDatos();
@@ -179,6 +180,7 @@ public class LienzoEditor {
             p.add(tex);
             p.add(boton);
         }
+        scrool.setViewportView(p);
 
     }
     

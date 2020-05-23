@@ -82,7 +82,8 @@ start with INICIO;
 
 INICIO ::=  LLAVES_A ESTRUCTURA_COLORES LLAVES_C
            |error:e ESTRUCTURA_PARAMETROS {:parser.syntax_error((Symbol)e);:}
-           |error:e ESTRUCTURA_FONDO {:parser.syntax_error((Symbol)e);:};
+           |error:e ESTRUCTURA_FONDO {:parser.syntax_error((Symbol)e);:}
+           |error:e {:parser.syntax_error((Symbol)e);:};
 
 ESTRUCTURA_COLORES ::= COLORES {:tablaSimbolos = parser.getTabla();:} DOS_PUNTOS LLAVES_A ESTRUCTURA_PARAMETROS LLAVES_C {: parser.setTablaColor(tablaColores); :};
 

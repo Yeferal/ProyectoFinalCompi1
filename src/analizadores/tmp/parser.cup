@@ -84,7 +84,8 @@ INICIO ::=  LLAVES_A ESTRUCTURA_TIEMPOS LLAVES_C
            |error:e ESTRUCTURA_PARAMETROS {:parser.syntax_error((Symbol)e);:}
            |error:e ATRIBUTOS {:parser.syntax_error((Symbol)e);:}
            |error:e ATRIB_IMAGENES {:parser.syntax_error((Symbol)e);:}
-           |error:e ESTRUCTURA_IMAGENES {:parser.syntax_error((Symbol)e);:};
+           |error:e ESTRUCTURA_IMAGENES {:parser.syntax_error((Symbol)e);:}
+           |error:e {:parser.syntax_error((Symbol)e);:};
 
 ESTRUCTURA_TIEMPOS ::= TIEMPOS {:tablaSimbolos = parser.getTabla();:} DOS_PUNTOS LLAVES_A ESTRUCTURA_PARAMETROS LLAVES_C {:parser.setTablaTiempos(tablaImagenes);:};
 

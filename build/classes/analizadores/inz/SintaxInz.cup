@@ -76,7 +76,8 @@ start with INICIO;
 INICIO ::= LLAVES_A ESTRUCTURA_LIENZOS LLAVES_C {: parser.setTabla(tablaSimbolos); :}
           |error:e ESTRUCTURA_PARAMETROS {:parser.syntax_error((Symbol)e);:}
           |error:e ATRIBUTOS {:parser.syntax_error((Symbol)e);:}
-          |error:e PARAMETROS {:parser.syntax_error((Symbol)e);:};
+          |error:e PARAMETROS {:parser.syntax_error((Symbol)e);:}
+          |error:e {:parser.syntax_error((Symbol)e);:};
 
 ESTRUCTURA_LIENZOS ::= LIENZOS DOS_PUNTOS LLAVES_A ESTRUCTURA_PARAMETROS LLAVES_C;
 

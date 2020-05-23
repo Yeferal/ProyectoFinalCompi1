@@ -399,6 +399,11 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         menuGenerar.add(menuItemEditorGrafico);
 
         menuItemGenerar.setText("Generar");
+        menuItemGenerar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuItemGenerarActionPerformed(evt);
+            }
+        });
         menuGenerar.add(menuItemGenerar);
 
         menuBar.add(menuGenerar);
@@ -551,6 +556,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         
         VentanaEditorGrafico ventanaEditorGrafico = new VentanaEditorGrafico(this);
         ventanaEditorGrafico.setListas(genradorLienzos.listaLienzoEditors);
+        ventanaEditorGrafico.setVisible(true);
     }//GEN-LAST:event_menuItemEditorGraficoActionPerformed
 
     private void menuItemSalirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuItemSalirActionPerformed
@@ -565,6 +571,15 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         texto += "Ademas de que se integra una analizador lexico y sintactico \npara la lectura correcta de los archivos.";
         JOptionPane.showMessageDialog(null, texto);
     }//GEN-LAST:event_menuItemAcercaDeActionPerformed
+
+    private void menuItemGenerarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuItemGenerarActionPerformed
+        GenradorLienzos genradorLienzos = new GenradorLienzos();
+        genradorLienzos.setTablas(analizadorSintacticoClrs.getTabla(), analizadorSintacticoClrs.getTablaColor(), analizadorSintacticoTmp.getTablaTiempos(),analizadorSintacticoPnt.getTablaPintar());
+        
+        VentanaEditorGrafico ventanaEditorGrafico = new VentanaEditorGrafico(this);
+        ventanaEditorGrafico.setListas(genradorLienzos.listaLienzoEditors);
+        ventanaEditorGrafico.generarImagenes();
+    }//GEN-LAST:event_menuItemGenerarActionPerformed
 
     
     // Variables declaration - do not modify//GEN-BEGIN:variables

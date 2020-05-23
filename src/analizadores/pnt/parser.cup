@@ -137,7 +137,8 @@ INICIO ::= INICIO_VARS FINALIZAR INICIO_INSTRUCCIONES {:parser.setTablaVariables
            |error:e DECLARACION_VARIABLES {:parser.syntax_error((Symbol)e);:}
            |error:e ASIGNACION_VALORES {:parser.syntax_error((Symbol)e);:}
            |error:e ESTRUC_PINTAR {:parser.syntax_error((Symbol)e);:}
-           |error:e INICIO_INSTRUCCIONES {:parser.syntax_error((Symbol)e);:};
+           |error:e INICIO_INSTRUCCIONES {:parser.syntax_error((Symbol)e);:}
+           |error:e {:parser.syntax_error((Symbol)e);:};
 
 INICIO_VARS ::= VARS CORCHETE_A FINALIZAR ESTRUCTURA_VARS CORCHETE_C;
 

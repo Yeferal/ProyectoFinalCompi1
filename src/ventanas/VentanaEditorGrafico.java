@@ -51,7 +51,7 @@ public class VentanaEditorGrafico extends javax.swing.JFrame {
             listaLienzoEditores.get(i).generarPaneles(tabbedEditor);
         }
         
-        this.setVisible(true);
+        
     }
     
     public boolean verificarDatoTipo(String numero){
@@ -87,7 +87,18 @@ public class VentanaEditorGrafico extends javax.swing.JFrame {
         
     }
     
-    
+    public void generarImagenes(){
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        fileChooser.showOpenDialog(this);
+        File file = fileChooser.getSelectedFile();
+        if(file!=null){
+            String ruta = file.getPath()+"/";
+            for (int i = 0; i < listaLienzoEditores.size(); i++) {
+                listaLienzoEditores.get(i).generarArchivoImagen(ruta);
+            }
+        }
+    }
 
     
     @SuppressWarnings("unchecked")
@@ -105,7 +116,7 @@ public class VentanaEditorGrafico extends javax.swing.JFrame {
         menuGenerar = new javax.swing.JMenu();
         menuItemGenerarImagen = new javax.swing.JMenuItem();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
         tabbedEditor.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -197,23 +208,17 @@ public class VentanaEditorGrafico extends javax.swing.JFrame {
     }//GEN-LAST:event_tabbedEditorMouseClicked
 
     private void menuItemEditarColoresActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuItemEditarColoresActionPerformed
-        
+        VentanaColores ventanaColores = new VentanaColores(this);
+        ventanaColores.setDatos(listaLienzoEditores, indiceTabbed-1);
+        ventanaColores.setVisible(true);
+        this.setVisible(false);
+        ventanaPrincipal.setVisible(false);
     }//GEN-LAST:event_menuItemEditarColoresActionPerformed
 
     private void menuItemGenerarImagenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuItemGenerarImagenActionPerformed
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        fileChooser.showOpenDialog(this);
-        File file = fileChooser.getSelectedFile();
-        if(file!=null){
-            String ruta = file.getPath()+"/";
-            for (int i = 0; i < listaLienzoEditores.size(); i++) {
-            listaLienzoEditores.get(i).generarArchivoImagen(ruta);
-        }
-        }
         
-        
-        
+        generarImagenes();
+
         
     }//GEN-LAST:event_menuItemGenerarImagenActionPerformed
 
