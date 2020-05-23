@@ -5,17 +5,112 @@
  */
 package ventanas;
 
+import java.util.ArrayList;
+import objetos.ErrorG;
+
 /**
  *
  * @author LENOVO-PC
  */
 public class VentanaErrores extends javax.swing.JFrame {
 
-    
+    public ArrayList<ErrorG> listaErroresLexicoLnz = new  ArrayList<>();
+    public ArrayList<ErrorG> listaErroresLexicoClrs = new  ArrayList<>();
+    public ArrayList<ErrorG> listaErroresLexicoTmp = new  ArrayList<>();
+    public ArrayList<ErrorG> listaErroresLexicoPnt = new  ArrayList<>();
+    public ArrayList<ErrorG> listaErroresLnz = new  ArrayList<>();
+    public ArrayList<ErrorG> listaErroresClrs = new  ArrayList<>();
+    public ArrayList<ErrorG> listaErroresTmp = new  ArrayList<>();
+    public ArrayList<ErrorG> listaErroresPnt = new  ArrayList<>();
+    String textolnz;
+    String textoClrs; 
+    String textoTmp; 
+    String textoPnt;
     
     public VentanaErrores() {
         initComponents();
         this.setLocationRelativeTo(null);
+    }
+    public void llenarErroresLexicos(ArrayList<ErrorG> erroresLnz, ArrayList<ErrorG> erroresClrs, ArrayList<ErrorG> erroresTmp, ArrayList<ErrorG> erroresPnt){
+        listaErroresLexicoLnz = erroresLnz;
+        listaErroresLexicoClrs = erroresClrs;
+        listaErroresLexicoTmp = erroresTmp;
+        listaErroresLexicoPnt = erroresPnt;
+        textolnz = "LEXICO\n";
+        textoClrs = "LEXICO\n";
+        textoTmp = "LEXICO\n";
+        textoPnt = "LEXICO\n";
+        
+        
+        
+        for (int i = 0; i < listaErroresLexicoLnz.size(); i++) {
+            textolnz += listaErroresLexicoLnz.get(i).getDescripcion() + "\n";
+        }
+        
+        for (int i = 0; i < listaErroresLexicoClrs.size(); i++) {
+            textoClrs += listaErroresLexicoClrs.get(i).getDescripcion() + "\n";
+        }
+        
+        for (int i = 0; i < listaErroresLexicoTmp.size(); i++) {
+            textoTmp += listaErroresLexicoTmp.get(i).getDescripcion() + "\n";
+        }
+        
+        for (int i = 0; i < listaErroresLexicoPnt.size(); i++) {
+            textoPnt += listaErroresLexicoPnt.get(i).getDescripcion() + "\n";
+        }
+        
+        textolnz += "\n";
+        textoClrs += "\n";
+        textoTmp += "\n";
+        textoPnt += "\n";
+    }
+    
+    public void llenarListasErrores(ArrayList<ErrorG> erroresLnz, ArrayList<ErrorG> erroresClrs, ArrayList<ErrorG> erroresTmp, ArrayList<ErrorG> erroresPnt){
+        this.listaErroresLnz = erroresLnz;
+        this.listaErroresClrs = erroresClrs;
+        this.listaErroresTmp = erroresTmp;
+        this.listaErroresPnt = erroresPnt;
+        textolnz += "\nSINTACTICO-SEMANTICO\n";
+        textoClrs += "\nSINTACTICO-SEMANTICO\n";
+        textoTmp += "\nSINTACTICO-SEMANTICO\n";
+        textoPnt += "\nSINTACTICO-SEMANTICO\n";
+        
+        for (int i = 0; i < listaErroresLnz.size(); i++) {
+            if(listaErroresLnz.get(i).getTipo().equals("Semantico")){
+                textolnz += listaErroresLnz.get(i).getDescripcion() + "     Linea: "+listaErroresLnz.get(i).getLinea()+", Columna: "+listaErroresLnz.get(i).getColumna()+"\n";
+            }else{
+                textolnz += listaErroresLnz.get(i).getDescripcion() + "\n";
+            }
+            
+        }
+        
+        for (int i = 0; i < listaErroresClrs.size(); i++) {
+            if(listaErroresClrs.get(i).getTipo().equals("Semantico")){
+                textoClrs += listaErroresClrs.get(i).getDescripcion() + "     Linea: "+listaErroresClrs.get(i).getLinea()+", Columna: "+listaErroresClrs.get(i).getColumna()+"\n";
+            }else{
+                textoClrs += listaErroresClrs.get(i).getDescripcion() + "\n";
+            }
+        }
+        
+        for (int i = 0; i < listaErroresTmp.size(); i++) {
+            if(listaErroresTmp.get(i).getTipo().equals("Semantico")){
+                textoTmp += listaErroresTmp.get(i).getDescripcion() + "     Linea: "+listaErroresTmp.get(i).getLinea()+", Columna: "+listaErroresTmp.get(i).getColumna()+"\n";
+            }else{
+                textoTmp += listaErroresTmp.get(i).getDescripcion() + "\n";
+            }
+        }
+        
+        for (int i = 0; i < listaErroresPnt.size(); i++) {
+            if(listaErroresPnt.get(i).getTipo().equals("Semantico")){
+                textoPnt += listaErroresPnt.get(i).getDescripcion() + "     Linea: "+listaErroresPnt.get(i).getLinea()+", Columna: "+listaErroresPnt.get(i).getColumna()+"\n";
+            }else{
+                textoPnt += listaErroresPnt.get(i).getDescripcion() + "\n";
+            }
+        }
+        textAreaLnz.setText(textolnz);
+        textAreaClrs.setText(textoClrs);
+        textAreaTmp.setText(textoTmp);
+        textAreaPnt.setText(textoPnt);
     }
     
     
@@ -25,46 +120,46 @@ public class VentanaErrores extends javax.swing.JFrame {
 
         panel = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTextArea1 = new javax.swing.JTextArea();
-        jLabel1 = new javax.swing.JLabel();
+        textAreaLnz = new javax.swing.JTextArea();
         jScrollPane2 = new javax.swing.JScrollPane();
-        jTextArea2 = new javax.swing.JTextArea();
+        textAreaTmp = new javax.swing.JTextArea();
         jScrollPane3 = new javax.swing.JScrollPane();
-        jTextArea3 = new javax.swing.JTextArea();
+        textAreaPnt = new javax.swing.JTextArea();
         jScrollPane4 = new javax.swing.JScrollPane();
-        jTextArea4 = new javax.swing.JTextArea();
-        jLabel2 = new javax.swing.JLabel();
-        jLabel3 = new javax.swing.JLabel();
-        jLabel4 = new javax.swing.JLabel();
-        jLabel5 = new javax.swing.JLabel();
+        textAreaClrs = new javax.swing.JTextArea();
+        labelLnz = new javax.swing.JLabel();
+        labelTmp = new javax.swing.JLabel();
+        labelClrs = new javax.swing.JLabel();
+        labelPnt = new javax.swing.JLabel();
+        labelErrores = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
-        jTextArea1.setColumns(20);
-        jTextArea1.setRows(5);
-        jScrollPane1.setViewportView(jTextArea1);
+        textAreaLnz.setColumns(20);
+        textAreaLnz.setRows(5);
+        jScrollPane1.setViewportView(textAreaLnz);
 
-        jLabel1.setText(".lnz");
+        textAreaTmp.setColumns(20);
+        textAreaTmp.setRows(5);
+        jScrollPane2.setViewportView(textAreaTmp);
 
-        jTextArea2.setColumns(20);
-        jTextArea2.setRows(5);
-        jScrollPane2.setViewportView(jTextArea2);
+        textAreaPnt.setColumns(20);
+        textAreaPnt.setRows(5);
+        jScrollPane3.setViewportView(textAreaPnt);
 
-        jTextArea3.setColumns(20);
-        jTextArea3.setRows(5);
-        jScrollPane3.setViewportView(jTextArea3);
+        textAreaClrs.setColumns(20);
+        textAreaClrs.setRows(5);
+        jScrollPane4.setViewportView(textAreaClrs);
 
-        jTextArea4.setColumns(20);
-        jTextArea4.setRows(5);
-        jScrollPane4.setViewportView(jTextArea4);
+        labelLnz.setText(".lnz");
 
-        jLabel2.setText(".tmp");
+        labelTmp.setText(".tmp");
 
-        jLabel3.setText(".clrs");
+        labelClrs.setText(".clrs");
 
-        jLabel4.setText(".pnt");
+        labelPnt.setText(".pnt");
 
-        jLabel5.setText("ERRORES");
+        labelErrores.setText("ERRORES");
 
         javax.swing.GroupLayout panelLayout = new javax.swing.GroupLayout(panel);
         panel.setLayout(panelLayout);
@@ -72,15 +167,15 @@ public class VentanaErrores extends javax.swing.JFrame {
             panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelLayout.createSequentialGroup()
                 .addGap(223, 223, 223)
-                .addComponent(jLabel1)
+                .addComponent(labelLnz)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jLabel3)
+                .addComponent(labelClrs)
                 .addGap(226, 226, 226))
             .addGroup(panelLayout.createSequentialGroup()
                 .addGap(222, 222, 222)
-                .addComponent(jLabel2)
+                .addComponent(labelTmp)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jLabel4)
+                .addComponent(labelPnt)
                 .addGap(232, 232, 232))
             .addGroup(panelLayout.createSequentialGroup()
                 .addGroup(panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -90,38 +185,42 @@ public class VentanaErrores extends javax.swing.JFrame {
                     .addGroup(panelLayout.createSequentialGroup()
                         .addGap(52, 52, 52)
                         .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 407, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(78, 78, 78)
                 .addGroup(panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 407, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 407, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(37, Short.MAX_VALUE))
+                    .addGroup(panelLayout.createSequentialGroup()
+                        .addGap(78, 78, 78)
+                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 407, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap(37, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelLayout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 407, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(29, 29, 29))))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelLayout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jLabel5)
+                .addComponent(labelErrores)
                 .addGap(462, 462, 462))
         );
         panelLayout.setVerticalGroup(
             panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelLayout.createSequentialGroup()
                 .addGap(13, 13, 13)
-                .addComponent(jLabel5)
+                .addComponent(labelErrores)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel1)
-                    .addComponent(jLabel3))
+                    .addComponent(labelLnz)
+                    .addComponent(labelClrs))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(panelLayout.createSequentialGroup()
                         .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 247, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 64, Short.MAX_VALUE)
-                        .addComponent(jLabel4)
+                        .addComponent(labelPnt)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 247, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(29, 29, 29))
                     .addGroup(panelLayout.createSequentialGroup()
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 247, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabel2)
+                        .addComponent(labelTmp)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 247, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(23, 23, 23))))
@@ -134,19 +233,19 @@ public class VentanaErrores extends javax.swing.JFrame {
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
-    private javax.swing.JTextArea jTextArea1;
-    private javax.swing.JTextArea jTextArea2;
-    private javax.swing.JTextArea jTextArea3;
-    private javax.swing.JTextArea jTextArea4;
+    private javax.swing.JLabel labelClrs;
+    private javax.swing.JLabel labelErrores;
+    private javax.swing.JLabel labelLnz;
+    private javax.swing.JLabel labelPnt;
+    private javax.swing.JLabel labelTmp;
     private javax.swing.JPanel panel;
+    private javax.swing.JTextArea textAreaClrs;
+    private javax.swing.JTextArea textAreaLnz;
+    private javax.swing.JTextArea textAreaPnt;
+    private javax.swing.JTextArea textAreaTmp;
     // End of variables declaration//GEN-END:variables
 }

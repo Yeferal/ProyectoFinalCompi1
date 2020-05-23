@@ -23,6 +23,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import tablas.Pintar;
 
 public class LienzoEditor {
     
@@ -30,6 +31,7 @@ public class LienzoEditor {
     public String nombreL;
     public ArrayList<Imagen> listaImagenes;
     public ArrayList<Color> listaColores;
+    public ArrayList<Pintar> listaPintar;
     public JPanel panelGeneral = new JPanel();
     public JPanel panelCuadors = new JPanel();
     public JPanel panelColores = new JPanel();
@@ -59,11 +61,17 @@ public class LienzoEditor {
         listaImagenes.add(i);
     }
     
+    public void agregarPintar(Pintar p){
+        System.out.println("Agregar Pintar");
+        listaPintar.add(p);
+    }
+    
     public LienzoEditor(Lienzo lienzo, String nombreL) {
         this.lienzo = lienzo;
         this.nombreL = nombreL;
         listaImagenes = new ArrayList<>();
         listaColores = new ArrayList<>();
+        listaPintar = new ArrayList<>();
     }
     
     public void generarPaneles(JTabbedPane tabbed){
@@ -93,12 +101,14 @@ public class LienzoEditor {
         agregarColores();
         llenarDatos();
         llenarCuadros(panelCuadors,0);
+        agregarImagenPintar();
         panelColores.add(botonColores);
         panelColores.add(scrool);
         panelGeneral.add(panelColores);
         panelGeneral.add(panelCuadors);
         
         tabbed.addTab(lienzo.getNombre(), panelGeneral);
+        
     }
     
     public void agregarColores(){
@@ -284,7 +294,7 @@ public class LienzoEditor {
     
     public void generaGif(String ruta){
         AnimatedGifEncoder e = new AnimatedGifEncoder();
-        e.start(ruta+"\\"+lienzo.getNombre()+".gif");
+        e.start(ruta+"/"+lienzo.getNombre()+".gif");
         //Inico
         Imagen inicio = buscarImagen(lienzo.getInicio());
         e.setDelay(inicio.getDuracion());
@@ -314,7 +324,7 @@ public class LienzoEditor {
             BufferedImage imagen = new BufferedImage(panelCuadors.getWidth(), panelCuadors.getHeight(), BufferedImage.TYPE_INT_RGB);
             llenarCuadros(panelCuadors, i);
             panelCuadors.paint(imagen.getGraphics());
-            ImageIO.write(imagen, "jpg", new File(ruta+"\\"+lienzo.getNombre()+"-"+listaImagenes.get(i).getId()+".jpg"));
+            ImageIO.write(imagen, "jpg", new File(ruta+"/"+lienzo.getNombre()+"-"+listaImagenes.get(i).getId()+".jpg"));
         }
         
         
@@ -330,5 +340,47 @@ public class LienzoEditor {
             }
         }
         return im;
+    }
+    
+    public Color buscarColor(String nombre){
+        Color c = null;
+        for (int i = 0; i < listaColores.size(); i++) {
+            if(listaColores.get(i).getNombre().equals(nombre)){
+                
+                c = listaColores.get(i);
+                return c;
+            }
+        }
+        return c;
+    }
+    public int buscarImagenIndex(String nombre){
+        int id = 0;
+        for (int i = 0; i < listaImagenes.size(); i++) {
+            if(listaImagenes.get(i).getId().equals(nombre)){
+                
+                id = i;
+                return id;
+            }
+        }
+        return id;
+    }
+    
+//    setBackground(new  java.awt.Color(lienzo.getRed(), lienzo.getGreen(), lienzo.getBlue()));
+//                }else{
+//                    boton.setBackground(java.awt.Color.decode(lienzo.fondoHEX));
+//                }
+    
+    public void agregarImagenPintar(){
+        for (int i = 0; i < listaPintar.size(); i++) {
+            Color cl = buscarColor(listaPintar.get(i).getIdColor());
+            java.awt.Color c;
+            if(cl.getTipoFondo()==1){
+                c= new java.awt.Color(cl.getRed(), cl.getGreen(), cl.getBlue());
+            }else{
+                c= java.awt.Color.decode(cl.getFondoHEX());
+            }
+            
+            listaImagenes.get(buscarImagenIndex(listaPintar.get(i).getIdImagen())).pintar(c,listaPintar.get(i).getPosX(), listaPintar.get(i).getPosY());
+        }
     }
 }

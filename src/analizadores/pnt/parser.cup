@@ -133,23 +133,23 @@ start with INICIO;
 
 //Reglas Semanticas
 
-INICIO ::= INICIO_VARS FINALIZAR INICIO_INSTRUCCIONES
+INICIO ::= INICIO_VARS FINALIZAR INICIO_INSTRUCCIONES {:parser.setTablaVariables(tablaSimbolosVariables); parser.setTablaPintar(tablaSimbolosPintar);:}
            |error:e DECLARACION_VARIABLES {:parser.syntax_error((Symbol)e);:}
            |error:e ASIGNACION_VALORES {:parser.syntax_error((Symbol)e);:}
            |error:e ESTRUC_PINTAR {:parser.syntax_error((Symbol)e);:}
            |error:e INICIO_INSTRUCCIONES {:parser.syntax_error((Symbol)e);:};
 
-INICIO_VARS ::= VARS CORCHETE_A FINALIZAR ESTRUCTURA_VARS CORCHETE_C {:parser.setTablaVariables(tablaSimbolosVariables); parser.setTablaPintar(tablaSimbolosPintar);:};
+INICIO_VARS ::= VARS CORCHETE_A FINALIZAR ESTRUCTURA_VARS CORCHETE_C;
 
 
 
 INICIO_INSTRUCCIONES ::= INSTRUCCIONES PARENTESIS_A IDENTIFICADOR:a {:
                         if(!parser.tablaSimbolos.buscarSimbolo((String)a)){
                                 correcto = false;
-                                ErrorG e = new ErrorG(aright+1,aleft+1,(String) a,"Semantico","El simbolo "+(String) a+" ya existe");
+                                ErrorG e = new ErrorG(aright+1,aleft+1,(String) a,"Semantico","El simbolo "+(String) a+" NO existe");
                                 parser.listaErrores.add(e);
-                                System.out.println("Semantico: El simbolo "+(String) a+" ya existe");
-                            }
+                                System.out.println("Semantico: El simbolo "+(String) a+" NO existe");
+                            }else{correcto = true; System.out.println("El simbolo "+(String) a+" si existe");}
                         :} PARENTESIS_C {:lienzoInstruccion = (String)a;:} CORCHETE_A FINALIZAR ESTRUCTURA_INSTRUCCIONES CORCHETE_C S0;
 
 S0 ::= 	  INICIO_INSTRUCCIONES
@@ -804,10 +804,11 @@ ESTRUC_PINTAR ::= TIPO_PINTAR PARENTESIS_A {:tipoIdP = 1;:} PRMT:a COMA {:tipoId
                     Rango rX = (Rango)c;
                     Rango rY = (Rango)d;
                     if(li!=null){
-                        if(li.getDimensionX()<=rX.getInicio() && li.getDimensionX()<=rX.getFin() && li.getDimensionY()<=rY.getInicio() && li.getDimensionY()<=rY.getFin()){
+                        if(li.getDimensionX()>=rX.getInicio() && li.getDimensionX()>=rX.getFin() && li.getDimensionY()>=rY.getInicio() && li.getDimensionY()>=rY.getFin()){
                             Pintar p = new Pintar(lienzoInstruccion, (String)a, (String)b, (Rango)c, (Rango)d);
                             SimboloObject s = new SimboloObject("Pintar", lienzoInstruccion , p);
                             tablaSimbolosPintar.agregarSimbolo(s);
+                            System.out.println("==========================================AGREGO PINTAR");
                         }else{
                             ErrorG e = null;
                             //error dato duplicado
@@ -834,7 +835,11 @@ ESTRUC_PINTAR ::= TIPO_PINTAR PARENTESIS_A {:tipoIdP = 1;:} PRMT:a COMA {:tipoId
                                 parser.listaErrores.add(e);
                                 System.out.println("Error Semantico: El simbolo "+rY.getFin()+" es muy grande que: "+li.getDimensionY());
                             }
+                            System.out.println(li.getDimensionX()+">="+rX.getInicio() +"   "+ li.getDimensionX()+">="+rX.getFin() +"   "+ li.getDimensionY()+">="+rY.getInicio() +"   "+ li.getDimensionY()+">="+rY.getFin());
+                            System.out.println("-------------------------------------- NO AGREGO PINTAR");
                         }
+                    }else{
+                        System.out.println("NO ENCONTRO EL LIENZO");
                     }
                     
                 }

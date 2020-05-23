@@ -7,6 +7,7 @@ package objetos;
 
 import archivos.GeneradorTextoArchivo;
 import java.util.ArrayList;
+import tablas.Pintar;
 import tablas.TablaSimbolos;
 
 public class GenradorLienzos {
@@ -15,16 +16,20 @@ public class GenradorLienzos {
     TablaSimbolos tablaLienzos;
     TablaSimbolos tablaColores;
     TablaSimbolos tablaImagenes;
+    TablaSimbolos tablaPintar;
     public ArrayList<LienzoEditor> listaLienzoEditors = new ArrayList<>();
     
-    public void setTablas(TablaSimbolos tablaLienzos, TablaSimbolos tablaColores, TablaSimbolos tablaImagenes){
+    public void setTablas(TablaSimbolos tablaLienzos, TablaSimbolos tablaColores, TablaSimbolos tablaImagenes, TablaSimbolos tablaPintar){
         this.tablaLienzos = tablaLienzos;
         this.tablaColores = tablaColores;
         this.tablaImagenes = tablaImagenes;
-        
+        this.tablaPintar = tablaPintar;
         buscarDatos();
         
     }
+    
+
+    
     
     public void buscarDatos(){
         
@@ -35,7 +40,17 @@ public class GenradorLienzos {
             listaLienzoEditors.add(lienzoEditor);
             agregarColores(tablaLienzos.getTablaSym().get(i).getNombre());
             agregarImagenes(tablaLienzos.getTablaSym().get(i).getNombre());
+            agregarPintar(tablaLienzos.getTablaSym().get(i).getNombre());
             tamanio++;
+        }
+    }
+    
+    public void agregarPintar(String nombre){
+        for (int i = 0; i < tablaPintar.getTablaSym().size(); i++) {
+            Pintar p= (Pintar) tablaPintar.getTablaSym().get(i).getObjeto();
+            if(p.getNombreLienzo().equals(nombre)){
+                listaLienzoEditors.get(tamanio).agregarPintar(p);
+            }
         }
     }
     

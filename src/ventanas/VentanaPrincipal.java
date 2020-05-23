@@ -43,54 +43,17 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     public ArrayList<ErrorG> listaErroresClrs = new  ArrayList<>();
     public ArrayList<ErrorG> listaErroresTmp = new  ArrayList<>();
     public ArrayList<ErrorG> listaErroresPnt = new  ArrayList<>();
+    public ArrayList<ErrorG> listaErroresLexicoLnz = new  ArrayList<>();
+    public ArrayList<ErrorG> listaErroresLexicoClrs = new  ArrayList<>();
+    public ArrayList<ErrorG> listaErroresLexicoTmp = new  ArrayList<>();
+    public ArrayList<ErrorG> listaErroresLexicoPnt = new  ArrayList<>();
     
     public VentanaPrincipal() {
         initComponents();
         this.setLocationRelativeTo(null);
         menuGenerar.setEnabled(false);
         menuErrores.setEnabled(false);
-       
-    }
-    
-    public void pintar() throws IOException{
-//        BufferedImage imagen = new BufferedImage(this.getWidth(), this.getHeight(), BufferedImage.TYPE_INT_ARGB);
-//        panel.paint(imagen.getGraphics());
-//        this.paint(imagen.getGraphics());
-        
-        AnimatedGifEncoder e = new AnimatedGifEncoder();
-        e.start("C:\\Users\\LENOVO-PC\\Desktop\\fichero2.gif");
-        e.setDelay(1000);
-        BufferedImage imagen1 = new BufferedImage(600, 600, BufferedImage.TYPE_INT_ARGB);
-        menuArchivo.paint(imagen1.getGraphics());
-        
-        BufferedImage imagen2 = new BufferedImage(600, 600, BufferedImage.TYPE_INT_ARGB);
-        menuAnalisis.paint(imagen2.getGraphics());
-        
-        BufferedImage imagen3 = new BufferedImage(600, 600, BufferedImage.TYPE_INT_ARGB);
-        menuGenerar.paint(imagen3.getGraphics());
-        
-        BufferedImage imagen4 = new BufferedImage(600, 600, BufferedImage.TYPE_INT_ARGB);
-        menuAyuda.paint(imagen4.getGraphics());
-        
-        BufferedImage imagen5 = new BufferedImage(600, 600, BufferedImage.TYPE_INT_ARGB);
-        menuErrores.paint(imagen5.getGraphics());
-        
-        e.addFrame(imagen1);
-        e.setDelay(2000);
-        e.addFrame(imagen2);
-        e.setDelay(10000);
-        e.addFrame(imagen2);
-        //e.addFrame(imagen2);
-        e.addFrame(imagen3);
-        e.setDelay(3000);
-        e.addFrame(imagen4);
-        e.addFrame(imagen5);
-//        e.addFrame(imagen2);
-        e.finish();
-        
-        
-        
-        //ImageIO.write(imagen, "jpg", new File("C:\\Users\\LENOVO-PC\\Desktop\\fichero2.gif"));
+        menuErrores.setEnabled(true);
     }
     
     public void crearArchivo(String nombre,String tipo){
@@ -99,7 +62,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         fileChooser.showOpenDialog(this);
         File file = fileChooser.getSelectedFile();
         if(file!=null){
-            String ruta = file.getPath()+"\\"+nombre;
+            String ruta = file.getPath()+"/"+nombre;
             System.out.println(ruta);
             archivo.crearArchivo(ruta, " ");
             ArchivoExt ar = new ArchivoExt(tipo, ruta);
@@ -154,7 +117,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }
     
     public void verificarErrores(ArrayList<ErrorG> erroresLnz, ArrayList<ErrorG> erroresClrs, ArrayList<ErrorG> erroresTmp, ArrayList<ErrorG> erroresPnt){
-        if(erroresLnz.size()>0 && erroresClrs.size()>0 && erroresTmp.size()>0 && erroresPnt.size()>0){
+        if(erroresLnz.size()>0 || erroresClrs.size()>0 || erroresTmp.size()>0 || erroresPnt.size()>0){
             JOptionPane.showMessageDialog(null, "Existen errores en el Archivo\nPuede verlos en la pestaña de Errores");
             menuGenerar.setEnabled(false);
             menuErrores.setEnabled(true);
@@ -163,6 +126,15 @@ public class VentanaPrincipal extends javax.swing.JFrame {
             listaErroresTmp = erroresTmp;
             listaErroresPnt = erroresPnt;
             
+        }else if(listaErroresLexicoLnz.size()>0 || listaErroresLexicoClrs.size()>0 || listaErroresLexicoTmp.size()>0 || listaErroresLexicoPnt.size()>0){
+            JOptionPane.showMessageDialog(null, "Existen errores en el Archivo\nPuede verlos en la pestaña de Errores");
+            menuGenerar.setEnabled(false);
+            menuErrores.setEnabled(true);
+            listaErroresLnz = erroresLnz;
+            listaErroresClrs = erroresClrs;
+            listaErroresTmp = erroresTmp;
+            listaErroresPnt = erroresPnt;
+        
         }else{
             JOptionPane.showMessageDialog(null, "Analisis Existoso");
             menuGenerar.setEnabled(true);
@@ -256,6 +228,11 @@ public class VentanaPrincipal extends javax.swing.JFrame {
             System.out.println("");
             tablaSimbolos = analizadorSintacticoPnt.getTablaPintar();
             tablaSimbolos.pintar();
+            
+            listaErroresLexicoLnz = analizadorLexicoLnz.listaErrores;
+            listaErroresLexicoClrs = analizadorLexicoClrs.listaErrores;
+            listaErroresLexicoTmp = analizadorLexicoTmp.listaErrores;
+            listaErroresLexicoPnt = analizadorLexicoPnt.listaErrores;
             
             verificarErrores(analizadorSintacticoLnz.listaErrores, analizadorSintacticoClrs.listaErrores, analizadorSintacticoTmp.listaErrores, analizadorSintacticoPnt.listaErrores);
         } catch (Exception ex) {
@@ -548,12 +525,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_menuItemGuardarActionPerformed
 
     private void menuItemManualUsuarioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuItemManualUsuarioActionPerformed
-        try {
-            pintar();
-            System.out.println("Listo");
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
+        
     }//GEN-LAST:event_menuItemManualUsuarioActionPerformed
 
     private void menuItemAnalisisActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuItemAnalisisActionPerformed
@@ -566,14 +538,16 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_menuItemAnalisisActionPerformed
 
     private void menuItemErroresActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuItemErroresActionPerformed
+        VentanaErrores ventanaErrores = new VentanaErrores();
+        ventanaErrores.llenarErroresLexicos(listaErroresLexicoLnz, listaErroresLexicoClrs, listaErroresLexicoTmp, listaErroresLexicoPnt);
+        ventanaErrores.llenarListasErrores(listaErroresLnz, listaErroresClrs, listaErroresTmp, listaErroresPnt);
+        ventanaErrores.setVisible(true);
         
-        
-            
     }//GEN-LAST:event_menuItemErroresActionPerformed
 
     private void menuItemEditorGraficoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuItemEditorGraficoActionPerformed
         GenradorLienzos genradorLienzos = new GenradorLienzos();
-        genradorLienzos.setTablas(analizadorSintacticoClrs.getTabla(), analizadorSintacticoClrs.getTablaColor(), analizadorSintacticoTmp.getTablaTiempos());
+        genradorLienzos.setTablas(analizadorSintacticoClrs.getTabla(), analizadorSintacticoClrs.getTablaColor(), analizadorSintacticoTmp.getTablaTiempos(),analizadorSintacticoPnt.getTablaPintar());
         
         VentanaEditorGrafico ventanaEditorGrafico = new VentanaEditorGrafico(this);
         ventanaEditorGrafico.setListas(genradorLienzos.listaLienzoEditors);

@@ -30,10 +30,7 @@ import javax.swing.SwingConstants;
 import objetos.ArchivoExt;
 import objetos.LienzoEditor;
 
-/**
- *
- * @author LENOVO-PC
- */
+
 public class VentanaEditorGrafico extends javax.swing.JFrame {
 
     VentanaPrincipal ventanaPrincipal;
@@ -209,7 +206,7 @@ public class VentanaEditorGrafico extends javax.swing.JFrame {
         fileChooser.showOpenDialog(this);
         File file = fileChooser.getSelectedFile();
         if(file!=null){
-            String ruta = file.getPath()+"\\";
+            String ruta = file.getPath()+"/";
             for (int i = 0; i < listaLienzoEditores.size(); i++) {
             listaLienzoEditores.get(i).generarArchivoImagen(ruta);
         }
