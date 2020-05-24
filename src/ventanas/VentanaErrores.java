@@ -77,7 +77,7 @@ public class VentanaErrores extends javax.swing.JFrame {
         
         for (int i = 0; i < listaErroresLnz.size(); i++) {
             if(listaErroresLnz.get(i).getTipo().equals("Semantico")){
-                textolnz += listaErroresLnz.get(i).getDescripcion() + "     Linea: "+listaErroresLnz.get(i).getLinea()+", Columna: "+listaErroresLnz.get(i).getColumna()+"\n";
+                textolnz += listaErroresLnz.get(i).getTipo()+": "+listaErroresLnz.get(i).getDescripcion() + "     Linea: "+listaErroresLnz.get(i).getLinea()+", Columna: "+listaErroresLnz.get(i).getColumna()+"\n";
             }else{
                 textolnz += listaErroresLnz.get(i).getDescripcion() + "\n";
             }
@@ -86,7 +86,7 @@ public class VentanaErrores extends javax.swing.JFrame {
         
         for (int i = 0; i < listaErroresClrs.size(); i++) {
             if(listaErroresClrs.get(i).getTipo().equals("Semantico")){
-                textoClrs += listaErroresClrs.get(i).getDescripcion() + "     Linea: "+listaErroresClrs.get(i).getLinea()+", Columna: "+listaErroresClrs.get(i).getColumna()+"\n";
+                textoClrs += listaErroresClrs.get(i).getTipo()+": "+listaErroresClrs.get(i).getDescripcion() + "     Linea: "+listaErroresClrs.get(i).getLinea()+", Columna: "+listaErroresClrs.get(i).getColumna()+"\n";
             }else{
                 textoClrs += listaErroresClrs.get(i).getDescripcion() + "\n";
             }
@@ -94,7 +94,7 @@ public class VentanaErrores extends javax.swing.JFrame {
         
         for (int i = 0; i < listaErroresTmp.size(); i++) {
             if(listaErroresTmp.get(i).getTipo().equals("Semantico")){
-                textoTmp += listaErroresTmp.get(i).getDescripcion() + "     Linea: "+listaErroresTmp.get(i).getLinea()+", Columna: "+listaErroresTmp.get(i).getColumna()+"\n";
+                textoTmp += listaErroresTmp.get(i).getTipo()+": "+listaErroresTmp.get(i).getDescripcion() + "     Linea: "+listaErroresTmp.get(i).getLinea()+", Columna: "+listaErroresTmp.get(i).getColumna()+"\n";
             }else{
                 textoTmp += listaErroresTmp.get(i).getDescripcion() + "\n";
             }
@@ -102,7 +102,7 @@ public class VentanaErrores extends javax.swing.JFrame {
         
         for (int i = 0; i < listaErroresPnt.size(); i++) {
             if(listaErroresPnt.get(i).getTipo().equals("Semantico")){
-                textoPnt += listaErroresPnt.get(i).getDescripcion() + "     Linea: "+listaErroresPnt.get(i).getLinea()+", Columna: "+listaErroresPnt.get(i).getColumna()+"\n";
+                textoPnt += listaErroresPnt.get(i).getTipo()+": "+listaErroresPnt.get(i).getDescripcion() + "     Linea: "+listaErroresPnt.get(i).getLinea()+", Columna: "+listaErroresPnt.get(i).getColumna()+"\n";
             }else{
                 textoPnt += listaErroresPnt.get(i).getDescripcion() + "\n";
             }

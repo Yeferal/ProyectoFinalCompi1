@@ -798,7 +798,23 @@ TIPO_PINTAR ::= PINTAR
                 |PINTAR_MIN;
 
 
-ESTRUC_PINTAR ::= TIPO_PINTAR PARENTESIS_A {:tipoIdP = 1;:} PRMT:a COMA {:tipoIdP = 2;:} PRMT:b COMA PRMT1:c COMA PRMT1:d PARENTESIS_C PUNTO_COMA {:
+ESTRUC_PINTAR ::= TIPO_PINTAR PARENTESIS_A {:tipoIdP = 1;:} PRMT:a {:
+                            Object obje = parser.tablaSimbolosColores.getObjetoN((String) a, lienzoInstruccion);
+                            if(obje==null){
+                                correcto = false;
+                                ErrorG e = new ErrorG(aright+1,aleft+1,(String) a,"Semantico","El simbolo "+(String) a+" no existe o no tiene valor");
+                                parser.listaErrores.add(e);
+                                System.out.println("Semantico: El simbolo "+(String) a+" no existe o no tiene valor");
+                            }
+                :} COMA {:tipoIdP = 2;:} PRMT:b {:
+                            Object obje = parser.tablaSimbolosImagenes.getObjetoN((String) b, lienzoInstruccion);
+                            if(obje==null){
+                                correcto = false;
+                                ErrorG e = new ErrorG(bright+1,bleft+1,(String) b,"Semantico","El simbolo "+(String) b+" no existe o no tiene valor");
+                                parser.listaErrores.add(e);
+                                System.out.println("Semantico: El simbolo "+(String) b+" no existe o no tiene valor");
+                            }
+                :} COMA PRMT1:c COMA PRMT1:d PARENTESIS_C PUNTO_COMA {:
 
                 if(correcto){
                     Lienzo li = parser.tablaSimbolos.getLienzo(lienzoInstruccion);
@@ -912,13 +928,13 @@ PRMT ::= PRMT:a MAS PRMT:b {:
                             if(obje!=null){
                                 existeVa = 1;
                             }
-                            
+                            /*
                             if(tipoIdP==1 && existeVa==0){
                                 obje = parser.tablaSimbolosColores.getObjetoN((String) a, lienzoInstruccion);
                             }else if(tipoIdP==2 && existeVa==0){
                                 obje = parser.tablaSimbolosImagenes.getObjetoN((String) a, lienzoInstruccion);
                             }
-
+                            */
                             if(obje!=null){
                                 RESULT = obje;
                             }else{
@@ -926,7 +942,7 @@ PRMT ::= PRMT:a MAS PRMT:b {:
                                 ErrorG e = new ErrorG(aright+1,aleft+1,(String) a,"Semantico","El simbolo "+(String) a+" no existe o no tiene valor");
                                 parser.listaErrores.add(e);
                                 System.out.println("Semantico: El simbolo "+(String) a+" no existe o no tiene valor");
-                                RESULT = 0;
+                                RESULT = " ";
                             }
                 
                         :};

@@ -7,6 +7,7 @@ import analizadores.pnt.*;
 import analizadores.tmp.*;
 import archivos.Archivo;
 import com.madgag.gif.fmsware.AnimatedGifEncoder;
+import java.awt.Desktop;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -53,7 +54,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         this.setLocationRelativeTo(null);
         menuGenerar.setEnabled(false);
         menuErrores.setEnabled(false);
-        menuErrores.setEnabled(true);
+        //menuErrores.setEnabled(true);
     }
     
     public void crearArchivo(String nombre,String tipo){
@@ -419,6 +420,11 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         menuAyuda.add(menuItemManualUsuario);
 
         menuItemManualTecnico.setText("Manual Tecnico");
+        menuItemManualTecnico.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuItemManualTecnicoActionPerformed(evt);
+            }
+        });
         menuAyuda.add(menuItemManualTecnico);
 
         menuItemAcercaDe.setText("Acerca de");
@@ -530,7 +536,12 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_menuItemGuardarActionPerformed
 
     private void menuItemManualUsuarioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuItemManualUsuarioActionPerformed
-        
+        try {
+            File path = new File ("Manual_Usuario_IDE.pdf");
+            Desktop.getDesktop().open(path);
+       }catch (IOException ex) {
+            ex.printStackTrace();
+       }
     }//GEN-LAST:event_menuItemManualUsuarioActionPerformed
 
     private void menuItemAnalisisActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuItemAnalisisActionPerformed
@@ -580,6 +591,15 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         ventanaEditorGrafico.setListas(genradorLienzos.listaLienzoEditors);
         ventanaEditorGrafico.generarImagenes();
     }//GEN-LAST:event_menuItemGenerarActionPerformed
+
+    private void menuItemManualTecnicoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuItemManualTecnicoActionPerformed
+        try {
+            File path = new File ("Manual_Tecnico_IDE.pdf");
+            Desktop.getDesktop().open(path);
+       }catch (IOException ex) {
+            ex.printStackTrace();
+       }
+    }//GEN-LAST:event_menuItemManualTecnicoActionPerformed
 
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
